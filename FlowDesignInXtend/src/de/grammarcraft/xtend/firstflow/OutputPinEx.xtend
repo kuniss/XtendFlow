@@ -4,12 +4,16 @@ import java.util.ArrayList
 import java.util.List
 
 class OutputPinEx<MessageType> {
-
+    
+    String name
     (Exception)=>void errorOperation
     
-    new((Exception)=>void errorOperation) {
+    new(String name, (Exception)=>void errorOperation) {
+        this.name = name
         this.errorOperation = errorOperation
     }
+
+    override toString() { this.name }
 
     private val List<(MessageType)=>void> outputOperations = new ArrayList
     
@@ -22,8 +26,8 @@ class OutputPinEx<MessageType> {
         }
         else {
             errorOperation.apply(
-                new RuntimeException("no binding defined for output of " + this + ": '" + 
-                msg + "' could not be delivered"))
+                new RuntimeException(
+                    '''no binding defined for output of '«this»': message '«msg»' could not be delivered.'''))
         }
     }
     

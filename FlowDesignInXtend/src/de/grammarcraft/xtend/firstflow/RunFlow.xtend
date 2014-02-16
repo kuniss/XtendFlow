@@ -16,13 +16,13 @@ class RunFlow {
 	  reverse -> toLower.input
 	  reverse -> toUpper.input
 	  toLower -> collector.input1
-	  toUpper.output -> collector.input2
+//	  toUpper.output -> collector.input2
 	  collector -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]
 	  
 	  // error handling
-      toUpper.error -> 
+      toUpper.integrationError -> 
       [ exception  |
         println("exception happended at " + toUpper + 
             ": " + exception.getMessage())
