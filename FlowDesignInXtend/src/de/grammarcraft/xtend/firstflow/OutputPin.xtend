@@ -3,7 +3,7 @@ package de.grammarcraft.xtend.firstflow
 import java.util.ArrayList
 import java.util.List
 
-class OutputPinEx<MessageType> {
+class OutputPin<MessageType> {
     
     String name
     (Exception)=>void errorOperation

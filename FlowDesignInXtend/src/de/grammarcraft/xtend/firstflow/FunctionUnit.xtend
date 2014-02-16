@@ -10,7 +10,7 @@ class FunctionUnit {
     
     override toString() { this.name }
     
-    public val integrationError = new OutputPinEx<Exception>('integrationError',
+    public val integrationError = new OutputPin<Exception>('integrationError',
         [
             ex | println(ex.message)
         ]

@@ -8,7 +8,7 @@ class ToUpper extends FunctionUnit {
     public val (String)=>void input = [msg | input(msg)]
 
     // output pins    
-    public val output = new OutputPinEx<String>('output', 
+    public val output = new OutputPin<String>('output', 
         [forwardIntegrationError]
     )
 
