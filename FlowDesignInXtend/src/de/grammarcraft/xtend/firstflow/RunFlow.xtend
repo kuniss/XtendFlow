@@ -1,5 +1,6 @@
 package de.grammarcraft.xtend.firstflow
 
+import static de.grammarcraft.xtend.firstflow.IntegrationErrorHandling.*
 
 class RunFlow {
   def static void main(String[] args) {
@@ -21,27 +22,9 @@ class RunFlow {
 		  println("received '" + msg + "' from " + collector)
 	  ]
 	  
-	  // error handling
-      toUpper.integrationError -> 
-      [ exception  |
-        println("exception happened at " + toUpper + 
-            ": " + exception.getMessage())
-      ]
-      toLower.integrationError -> 
-      [ exception  |
-        println("exception happened at " + toLower + 
-            ": " + exception.getMessage())
-      ]
-      reverse.integrationError -> 
-      [ exception  |
-        println("exception happened at " + reverse + 
-            ": " + exception.getMessage())
-      ]
-      collector.integrationError -> 
-      [ exception  |
-        println("exception happened at " + collector + 
-            ": " + exception.getMessage())
-      ]
+	  onIntegrationErrorAt(#[toUpper, toLower, reverse, collector], 
+	      [ exception | println("integration error happened: " + exception.message)]
+	  )
 
 	  // run
 	  println("run them...")
