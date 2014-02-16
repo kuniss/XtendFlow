@@ -19,7 +19,7 @@ class Collector extends FunctionUnit {
     def input2(String msg) { accumulateInput(msg) }
     
     // output pin    
-    public val output = new OutputPin<String>('output', 
+    public val output = new OutputPin<String>('''«this».output''', 
         [forwardIntegrationError]
     )
     

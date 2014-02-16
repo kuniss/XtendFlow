@@ -9,7 +9,7 @@ class ToUpper extends FunctionUnit {
     def input(String msg) { processInput(msg) }
 
     // output pin    
-    public val output = new OutputPin<String>('output', 
+    public val output = new OutputPin<String>('''«this».output''', 
         [forwardIntegrationError]
     )
 

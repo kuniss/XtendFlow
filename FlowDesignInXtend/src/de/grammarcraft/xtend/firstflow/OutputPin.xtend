@@ -27,7 +27,7 @@ class OutputPin<MessageType> {
         else {
             errorOperation.apply(
                 new RuntimeException(
-                    '''no binding defined for output of '«this»': message '«msg»' could not be delivered.'''))
+                    '''no binding defined for '«this»' - message '«msg»' could not be delivered.'''))
         }
     }
     
