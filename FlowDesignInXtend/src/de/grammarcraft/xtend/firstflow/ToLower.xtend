@@ -1,39 +1,27 @@
 package de.grammarcraft.xtend.firstflow
 
-import java.util.List
-import java.util.ArrayList
-
-class ToLower {
+class ToLower extends FunctionUnit {
     
+    new() { super('ToLower') }
+    
+    // input pin
     public val (String)=>void input = [msg | input(msg)]
-    
-    def input(String msg) {
-        process(msg)
-    }
-    
-    private val List<(String)=>void> outputOperations = new ArrayList
-    
-    private def output(String msg) {
-        if (!outputOperations.empty) {
-            outputOperations.forEach[
-                operation | operation.apply(msg)
-            ]
-        }
-    }
-    
+    def input(String msg) { processInput(msg) }
+
+    // output pin  
+    public val output = new OutputPin<String>('output', 
+        [forwardIntegrationError]
+    )
+
+    // convenient operator for function units defining one and only one output pin:
     // defines operator "->", used as function unit connector
-    def operator_mappedTo((String)=>void operation) {
-        outputOperations.add(operation)
+    def void operator_mappedTo((String)=>void operation) {
+        output -> operation
     }
-
-    override toString() {
-        this.getClass.simpleName        
-    }
-
        
     // This method implements the semantic of the function unit
-    private def process(String msg) {
-        output(msg.toLowerCase)
+    private def processInput(String msg) {
+        output.forward(msg.toLowerCase);
     }
-    
+        
 }

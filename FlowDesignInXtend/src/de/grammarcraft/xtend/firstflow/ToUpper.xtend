@@ -2,23 +2,26 @@ package de.grammarcraft.xtend.firstflow
 
 class ToUpper extends FunctionUnit {
     
-    new() { super("ToUpper") }
+    new() { super('ToUpper') }
     
-    // input pins
+    // input pin
     public val (String)=>void input = [msg | input(msg)]
+    def input(String msg) { processInput(msg) }
 
-    // output pins    
+    // output pin    
     public val output = new OutputPin<String>('output', 
         [forwardIntegrationError]
     )
 
-
-    def input(String msg) {
-        process(msg)
+    // convenient operator for function units defining one and only one output pin:
+    // defines operator "->", used as function unit connector
+    def void operator_mappedTo((String)=>void operation) {
+        output -> operation
     }
-    
+
+
     // This method implements the semantic of the function unit
-    private def process(String msg) {
+    private def processInput(String msg) {
         output.forward(msg.toUpperCase);
     }
     

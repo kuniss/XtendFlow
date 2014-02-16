@@ -14,9 +14,9 @@ class RunFlow {
 	  // bind
 	  println("bind them...")
 	  reverse -> toLower.input
-	  reverse -> toUpper.input
+	  reverse.output -> toUpper.input
 	  toLower -> collector.input1
-//	  toUpper.output -> collector.input2
+	  toUpper -> collector.input2
 	  collector -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]
@@ -24,7 +24,22 @@ class RunFlow {
 	  // error handling
       toUpper.integrationError -> 
       [ exception  |
-        println("exception happended at " + toUpper + 
+        println("exception happened at " + toUpper + 
+            ": " + exception.getMessage())
+      ]
+      toLower.integrationError -> 
+      [ exception  |
+        println("exception happened at " + toLower + 
+            ": " + exception.getMessage())
+      ]
+      reverse.integrationError -> 
+      [ exception  |
+        println("exception happened at " + reverse + 
+            ": " + exception.getMessage())
+      ]
+      collector.integrationError -> 
+      [ exception  |
+        println("exception happened at " + collector + 
             ": " + exception.getMessage())
       ]
 

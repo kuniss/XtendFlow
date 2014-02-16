@@ -1,45 +1,34 @@
 package de.grammarcraft.xtend.firstflow
 
-import java.util.List
-import java.util.ArrayList
+class Reverse extends FunctionUnit {
+    
+    new() { super("Reverse") }
+    
+    // input pins
+    public val (String)=>void input = [msg | processInput(msg)]
+    def input(String msg) { processInput(msg) }
 
-class Reverse {
-    
-    public val (String)=>void input = [msg | input(msg)]
-    
-    def input(String msg) {
-        process(msg)
-    }
-    
-    private val List<(String)=>void> outputOperations = new ArrayList
-    
-    private def output(String msg) {
-        if (!outputOperations.empty) {
-            outputOperations.forEach[
-                operation | operation.apply(msg)
-            ]
-        }
-    }
-    
+    // output pins    
+    public val output = new OutputPin<String>('output', 
+        [forwardIntegrationError]
+    )
+
+    // convenient operator for function units defining one and only one output pin:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo((String)=>void operation) {
-        outputOperations.add(operation)
+        output -> operation
     }
 
-    override toString() {
-        this.getClass.simpleName        
-    }
-    
     
     // This method implements the semantic of the function unit      
-    def process(String msg) {
+    def processInput(String msg) {
         val reversedMsgBuilder = new StringBuilder
         var index = msg.length
         while (index > 0) {
             index = index - 1
             reversedMsgBuilder.append(msg.charAt(index))
         }
-        output(reversedMsgBuilder.toString)
+        output.forward(reversedMsgBuilder.toString)
     }
     
 }

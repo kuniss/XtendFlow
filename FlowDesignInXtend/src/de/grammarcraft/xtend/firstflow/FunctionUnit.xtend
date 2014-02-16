@@ -2,7 +2,7 @@ package de.grammarcraft.xtend.firstflow
 
 class FunctionUnit {
     
-    String name
+    val String name
     
     new(String name) {
         this.name = name
@@ -12,7 +12,7 @@ class FunctionUnit {
     
     public val integrationError = new OutputPin<Exception>('integrationError',
         [
-            ex | println(ex.message)
+            ex | println('FATAL ERROR: ' + ex.message)
         ]
     )
     
