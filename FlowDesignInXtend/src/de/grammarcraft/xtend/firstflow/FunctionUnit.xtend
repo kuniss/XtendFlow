@@ -1,6 +1,6 @@
 package de.grammarcraft.xtend.firstflow
 
-class FunctionUnit {
+package class FunctionUnit {
     
     val String name
     

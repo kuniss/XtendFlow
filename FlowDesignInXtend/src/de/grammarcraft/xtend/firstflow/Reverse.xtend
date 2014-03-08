@@ -1,6 +1,6 @@
 package de.grammarcraft.xtend.firstflow
 
-class Reverse extends FunctionUnit {
+package class Reverse extends FunctionUnit {
     
     new() { super("Reverse") }
     

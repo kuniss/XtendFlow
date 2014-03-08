@@ -2,7 +2,7 @@ package de.grammarcraft.xtend.firstflow
 
 import static de.grammarcraft.xtend.firstflow.IntegrationErrorHandling.*
 
-class RunFlow {
+package class RunFlow {
   def static void main(String[] args) {
       
 	  // build

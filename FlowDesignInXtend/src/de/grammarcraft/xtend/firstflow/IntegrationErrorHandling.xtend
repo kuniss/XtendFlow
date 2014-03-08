@@ -2,7 +2,7 @@ package de.grammarcraft.xtend.firstflow
 
 import java.util.List
 
-abstract class IntegrationErrorHandling {
+package abstract class IntegrationErrorHandling {
     
     static def void onIntegrationErrorAt(
         List<? extends FunctionUnit> functionUnits, 

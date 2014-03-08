@@ -3,7 +3,7 @@ package de.grammarcraft.xtend.firstflow
 import java.util.List
 import java.util.ArrayList
 
-class Collector extends FunctionUnit {
+package class Collector extends FunctionUnit {
   
     new(String separator) {
         super('Collector')

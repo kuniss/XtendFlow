@@ -1,6 +1,6 @@
 package de.grammarcraft.xtend.firstflow
 
-class ToUpper extends FunctionUnit {
+package class ToUpper extends FunctionUnit {
     
     new() { super('ToUpper') }
     
