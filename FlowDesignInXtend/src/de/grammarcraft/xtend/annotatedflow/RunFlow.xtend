@@ -16,8 +16,8 @@ class RunFlow {
 	  println("bind them...")
 	  reverse -> toLower.input
 	  reverse.output -> toUpper.input
-	  toLower -> collector.input1
-	  toUpper -> collector.input2
+	  toLower -> collector.lower
+	  toUpper -> collector.upper
 	  collector -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]

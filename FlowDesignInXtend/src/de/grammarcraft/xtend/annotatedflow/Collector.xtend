@@ -8,8 +8,8 @@ import java.util.ArrayList
 
 @FunctionUnit(
     inputPins = #[
-        @InputPin(name="input1", type=String),
-        @InputPin(name="input2", type=String)
+        @InputPin(name="lower", type=String),
+        @InputPin(name="upper", type=String)
     ],
     outputPins = #[
         @OutputPin(name="output", type=String)
@@ -21,11 +21,11 @@ class Collector {
         this.separator = separator;
     }
     
-    override processInput1(String msg) {
+    override processLower(String msg) {
         accumulateInput(msg)
     }
     
-    override processInput2(String msg) {
+    override processUpper(String msg) {
         accumulateInput(msg)
     }
     
@@ -37,6 +37,7 @@ class Collector {
         accumulation.add(msg)
         if (accumulation.length == 2) output.forward(accumulation.join(separator))
     }
+    
     
     
 }
