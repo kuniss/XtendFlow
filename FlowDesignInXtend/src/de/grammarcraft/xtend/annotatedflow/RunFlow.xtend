@@ -10,21 +10,21 @@ class RunFlow {
 	  val reverse = new Reverse
 	  val toLower = new ToLower
 	  val toUpper = new ToUpper
+	  val normalizer = new Normalize
 	  val collector = new Collector(", ")
 	  
 	  // bind
 	  println("bind them...")
-	  reverse -> toLower.input
-	  reverse.output -> toUpper.input
-	  toLower -> collector.lower
-	  toUpper -> collector.upper
+	  reverse -> normalizer.input
+	  normalizer.lower -> collector.lower
+	  normalizer.upper -> collector.upper
 	  collector -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]
 	  
-	  onIntegrationErrorAt(#[toUpper, toLower, reverse, collector], 
-	      [ exception | println("integration error happened: " + exception.message)]
-	  )
+	  onIntegrationErrorAt(#[toUpper, toLower, reverse, collector]) [ 
+	      exception | println("integration error happened: " + exception.message)
+	  ]
 
 	  // run
 	  println("run them...")
