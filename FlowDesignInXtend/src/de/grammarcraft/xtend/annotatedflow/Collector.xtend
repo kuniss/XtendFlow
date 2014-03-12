@@ -12,7 +12,8 @@ import java.util.ArrayList
         @InputPin(name="upper", type=String)
     ],
     outputPins = #[
-        @OutputPin(name="output", type=String)
+        @OutputPin(name="output", type=String),
+        @OutputPin(name="error", type=String)
     ]
 )
 class Collector {
@@ -22,10 +23,14 @@ class Collector {
     }
     
     override processLower(String msg) {
+        if (accumulation.length >= 2) 
+            error.forward(this + ' got more than two input messages; not allowed')
         accumulateInput(msg)
     }
     
     override processUpper(String msg) {
+        if (accumulation.length >= 2) 
+            error.forward(this + ' got more than two input messages; not allowed')
         accumulateInput(msg)
     }
     

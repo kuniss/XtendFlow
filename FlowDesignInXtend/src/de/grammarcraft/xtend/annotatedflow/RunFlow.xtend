@@ -8,21 +8,23 @@ class RunFlow {
 	  // build
 	  println("instantiate flow units...")
 	  val reverse = new Reverse
-	  val toLower = new ToLower
-	  val toUpper = new ToUpper
 	  val normalizer = new Normalize
 	  val collector = new Collector(", ")
+      val notConnectedFunctionUnit = new Reverse
 	  
 	  // bind
 	  println("bind them...")
 	  reverse -> normalizer.input
 	  normalizer.lower -> collector.lower
 	  normalizer.upper -> collector.upper
-	  collector -> [ msg | 
+	  collector.output -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]
+	  collector.error -> [ errMsg |
+	      println('error received: ' + errMsg)
+	  ]
 	  
-	  onIntegrationErrorAt(#[toUpper, toLower, reverse, collector]) [ 
+	  onIntegrationErrorAt(#[reverse, collector, notConnectedFunctionUnit]) [ 
 	      exception | println("integration error happened: " + exception.message)
 	  ]
 
@@ -31,6 +33,10 @@ class RunFlow {
 	  val palindrom = "Trug Tim eine so helle Hose nie mit Gurt?"
 	  println("send message: " + palindrom)
 	  reverse.input(palindrom)
+	  
+      reverse.input(palindrom) // second call should raise an error message on the Collectors error port
+
+      notConnectedFunctionUnit.input(palindrom) // should raise an integration error as function unit is not connected to any one
 
 	  println("finished.")
 	  
