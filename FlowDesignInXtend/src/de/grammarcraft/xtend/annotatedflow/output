@@ -1,0 +1,9 @@
+instantiate flow units...
+bind them...
+run them...
+send message: Trug Tim eine so helle Hose nie mit Gurt?
+received '?trug tim ein esoh elleh os enie mit gurt, ?TRUG TIM EIN ESOH ELLEH OS ENIE MIT GURT' from Collector
+error received: Collector got more than two input messages; not allowed
+error received: Collector got more than two input messages; not allowed
+integration error happened: no binding defined for 'Reverse.output' - message '?truG tim ein esoH elleh os enie miT gurT' could not be delivered.
+finished.
