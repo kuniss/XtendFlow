@@ -9,14 +9,14 @@ import de.grammarcraft.xtend.flow.annotations.OutputPin
         @InputPin(name="input", type=String)
     ],
     outputPins = #[
-        @OutputPin(name="output", type=String)
+        @OutputPin(name="ausgabe", type=String)
     ]
 )
 class ToLower {
     
     // This method implements the semantic of the function unit
     override processInput(String msg) {
-        output.forward(msg.toLowerCase);
+        ausgabe.forward(msg.toLowerCase);
     }
         
 }

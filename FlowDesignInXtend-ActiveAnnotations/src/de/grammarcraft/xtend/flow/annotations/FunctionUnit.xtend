@@ -21,11 +21,13 @@ annotation FunctionUnit {
 annotation InputPin {
     String name
     Class<?> type
+    Class<?>[] typeParameters = #[]
 }
 
 annotation OutputPin {
     String name
     Class<?> type
+    Class<?>[] typeParameters = #[]
 }
 
 class FunctionUnitProcessor extends AbstractClassProcessor {
@@ -72,6 +74,10 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     
     private static def TypeReference pinType(AnnotationReference annotationReference) {
         annotationReference.getValue("type") as TypeReference
+    }
+    
+    private static def TypeReference[] pinTypeParameters(AnnotationReference annotationReference) {
+        annotationReference.getValue("typeParameters") as TypeReference[]
     }
     
     private static def doubledAnnotations(Iterable<? extends AnnotationReference> pinAnnotations) {
@@ -173,7 +179,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 
             val pinName = inputPinAnnotation.pinName
             val inputPinInterfaceName = getInputPinInterfaceName(annotatedClass, inputPinAnnotation)
-            val msgType = inputPinAnnotation.pinType
+            val msgType = inputPinAnnotation.pinType.type.newTypeReference(inputPinAnnotation.pinTypeParameters)
             
             annotatedClass.addField(pinName, [
                 final = true
@@ -218,8 +224,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     private def addOutputPins(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
         outputPinAnnotations.forEach[ outputPinAnnotation |
             val pinName = outputPinAnnotation.pinName
-            val msgType = outputPinAnnotation.pinType
-            
+            val msgType = outputPinAnnotation.pinType.type.newTypeReference(outputPinAnnotation.pinTypeParameters)
+                        
             // add output pin
             annotatedClass.addField(pinName, [
                 final = true
@@ -250,14 +256,13 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                         val operationType = 
                             Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
                         addParameter('operation', operationType)
-                        body = ['''this.output.operator_mappedTo(operation);''']
+                        body = ['''this.«pinName».operator_mappedTo(operation);''']
                     ]
                 )
             }
             
         ]
-    }
-    
+    }    
 
 }
 
