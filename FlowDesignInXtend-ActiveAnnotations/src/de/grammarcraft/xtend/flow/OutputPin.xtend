@@ -36,4 +36,11 @@ class OutputPin<MessageType> {
         outputOperations.add(operation)
     }
     
+    // convenient operator for connecting to function units defining one and only one input pin:
+    // defines operator "->", used as function unit connector
+    def void operator_mappedTo(FunctionUnitBase fu) {
+        outputOperations.add(fu.theOneAndOnlyInputPin)
+    }
+    
+    
 }

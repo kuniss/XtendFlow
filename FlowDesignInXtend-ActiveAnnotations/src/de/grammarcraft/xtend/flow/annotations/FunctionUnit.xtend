@@ -218,6 +218,21 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 '''
                 addParameter(msgParameterName, msgType)
             ]
+            
+            // override the canonical function unit base method getTheOneAndOnlyInputPin for returning
+            // the procedure assigned to this one and only input pin
+            if (inputPinAnnotations.size == 1) {
+                annotatedClass.addMethod('getTheOneAndOnlyInputPin', 
+                        [
+                            returnType = 
+                                Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
+                            body = ['''
+                                return this.«pinName»;
+                            ''']
+                        ]
+                )
+                
+            }
         ]
     }
     
@@ -249,7 +264,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ''']
             ])
             
-            // add output connection operator -> if it is an one output pin only function unit
+            // add output connection operators -> if it is an one output pin only function unit
             if (outputPinAnnotations.size == 1) {
                 annotatedClass.addMethod('operator_mappedTo', 
                     [
@@ -259,6 +274,12 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                         body = ['''this.«pinName».operator_mappedTo(operation);''']
                     ]
                 )
+                annotatedClass.addMethod('operator_mappedTo', 
+                    [
+                        addParameter('fu', FunctionUnitBase.newTypeReference)
+                        body = ['''this.«pinName».operator_mappedTo(fu.<«msgType»>getTheOneAndOnlyInputPin());''']
+                    ]
+                )                
             }
             
         ]

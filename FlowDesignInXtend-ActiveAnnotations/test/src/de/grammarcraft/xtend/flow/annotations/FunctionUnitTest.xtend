@@ -9,6 +9,7 @@ import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.junit.Test
 
 import static org.junit.Assert.*
+import de.grammarcraft.xtend.flow.FunctionUnitBase
 
 class FunctionUnitTest {
 
@@ -57,6 +58,7 @@ class FunctionUnitTest {
             assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
             assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
             
+            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
             
         ]
@@ -101,6 +103,7 @@ class FunctionUnitTest {
             assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
             assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
             
+            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
             
         ]
@@ -145,6 +148,7 @@ class FunctionUnitTest {
             assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
             assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
             
+            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
             
         ]
@@ -198,6 +202,7 @@ class FunctionUnitTest {
             assertInputPinGenerated(inputPin2Name, inputPin2Type, className, clazz, ctx)            
             assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
             
+            assertTheOneAndOnlyInputPinCanonicalMethodNOTGenerated(className, inputPinType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
             
         ]
@@ -249,6 +254,7 @@ class FunctionUnitTest {
             assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
             assertOutputPinGenerated(output2PinName, output2PinType, className, clazz, ctx)
             
+            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
             assertMappedToOperatorNOTGenerated(className, clazz, ctx)
             
         ]
@@ -297,6 +303,7 @@ class FunctionUnitTest {
             assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
             assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
             
+            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
             
         ]
@@ -371,7 +378,14 @@ class FunctionUnitTest {
         assertTrue('''operator -> (operator_mappedTo) does not exist at «className»''',
             clazz.declaredMethods.exists[simpleName == 'operator_mappedTo']
         )
-        clazz.declaredMethods.filter[simpleName == 'operator_mappedTo'].head => [
+        val operatorMethods = clazz.declaredMethods.filter[simpleName == 'operator_mappedTo']
+        assertEquals('''there are not two operator -> (operator_mappedTo) methods at «className»''',
+            2, operatorMethods.size
+        )
+        assertEquals('''there is no operator -> (operator_mappedTo) method with parameter «FunctionUnitBase.newTypeReference»''',
+            1, operatorMethods.filter[parameters.head.type == FunctionUnitBase.newTypeReference].size
+        )
+        operatorMethods.filter[parameters.head.type != FunctionUnitBase.newTypeReference].head => [
             assertEquals('''method '«simpleName»' has not exactly one parameter''', 
                 1, parameters.size
             )
@@ -381,12 +395,36 @@ class FunctionUnitTest {
             )
         ]
     }
-    
+
     private def assertMappedToOperatorNOTGenerated(String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
         assertFalse('''operator -> (operator_mappedTo) must NOT not exist at «className», but is there''',
             clazz.declaredMethods.exists[simpleName == 'operator_mappedTo']
+        )
+    }
+
+
+    private def assertTheOneAndOnlyInputPinCanonicalMethodGenerated(String className, TypeReference outputPinType,
+        MutableClassDeclaration clazz, extension TransformationContext ctx) 
+    {
+        assertTrue('''canonical method 'theOneAndOnlyInputPin' is not overridden at «className»''',
+            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPin']
+        )
+        clazz.declaredMethods.filter[simpleName == 'getTheOneAndOnlyInputPin'].head => [
+            assertTrue('''method '«simpleName»' must not have parameters''', parameters.empty)
+            assertEquals('''method '«simpleName»' return type is not «Procedures.Procedure1.newTypeReference»''', 
+                Procedures.Procedure1.newTypeReference(outputPinType.newWildcardTypeReferenceWithLowerBound), 
+                returnType
+            )
+        ]
+    }
+    
+    private def assertTheOneAndOnlyInputPinCanonicalMethodNOTGenerated(String className, TypeReference outputPinType,
+        MutableClassDeclaration clazz, extension TransformationContext ctx) 
+    {
+        assertFalse('''canonical method 'theOneAndOnlyInputPin' must NOT not exist at «className», but is there''',
+            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPin']
         )
     }
     

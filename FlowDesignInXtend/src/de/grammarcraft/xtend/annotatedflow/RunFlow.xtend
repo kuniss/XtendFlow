@@ -14,9 +14,9 @@ class RunFlow {
 	  
 	  // bind
 	  println("bind them...")
-	  reverse -> normalizer.input
-	  normalizer.lower -> collector.lower
-	  normalizer.upper -> collector.upper
+	  reverse -> normalizer
+	  normalizer.lower -> collector
+	  normalizer.upper -> collector
 	  collector.output -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]
