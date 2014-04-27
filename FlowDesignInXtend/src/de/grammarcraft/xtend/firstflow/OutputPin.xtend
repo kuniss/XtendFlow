@@ -17,12 +17,6 @@ package class OutputPin<MessageType> {
 
     private val List<(MessageType)=>void> outputOperations = new ArrayList
     
-    // convenient operator for connecting to function units defining one and only one input pin:
-    // defines operator "->", used as function unit connector
-    def void operator_mappedTo(FunctionUnit fu) {
-        outputOperations.add(fu.theOneAndOnlyInputPin)
-    }
-    
     def forward(MessageType msg) {
         if (!outputOperations.empty) {
             outputOperations.forEach[
@@ -39,6 +33,12 @@ package class OutputPin<MessageType> {
     // defines operator "->", used as function unit connector
     def void operator_mappedTo((MessageType)=>void operation) {
         outputOperations.add(operation)
+    }
+
+    // convenient operator for connecting to function units defining one and only one input pin:
+    // defines operator "->", used as function unit connector
+    def void operator_mappedTo(FunctionUnit fu) {
+        outputOperations.add(fu.theOneAndOnlyInputPin)
     }
     
 }
