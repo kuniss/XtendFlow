@@ -18,7 +18,13 @@ package class Reverse extends FunctionUnit {
     def void operator_mappedTo((String)=>void operation) {
         output -> operation
     }
-
+    
+    // convenient operator for function units defining one and only one output pin 
+    // and, connecting it to function units having one and only one input pin:
+    // defines operator "->", used as function unit connector
+    def void operator_mappedTo(FunctionUnit fu) {
+        output -> fu.theOneAndOnlyInputPin
+    }
     
     // This method implements the semantic of the function unit      
     def processInput(String msg) {

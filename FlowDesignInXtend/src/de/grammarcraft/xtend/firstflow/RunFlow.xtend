@@ -14,11 +14,11 @@ package class RunFlow {
 	  
 	  // bind
 	  println("bind them...")
-	  reverse -> toLower.input
-	  reverse.output -> toUpper.input
+	  reverse -> toLower
+	  reverse -> toUpper
 	  toLower -> collector.input1
 	  toUpper -> collector.input2
-	  collector -> [ msg | 
+	  collector.output -> [ msg | 
 		  println("received '" + msg + "' from " + collector)
 	  ]
 	  

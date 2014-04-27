@@ -12,6 +12,10 @@ package class ToLower extends FunctionUnit {
     public val output = new OutputPin<String>('''«this».output''', 
         [forwardIntegrationError]
     )
+    
+    override (String)=>void getTheOneAndOnlyInputPin() {
+        return input;
+    }
 
     // convenient operator for function units defining one and only one output pin:
     // defines operator "->", used as function unit connector
