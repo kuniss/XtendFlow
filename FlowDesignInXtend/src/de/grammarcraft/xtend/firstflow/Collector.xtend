@@ -10,16 +10,16 @@ package class Collector extends FunctionUnit {
         this.separator = separator
     }
     
-    // input1 pin
+    // input1 port
     public val (String)=>void input1 = [msg | input1(msg)]
     def input1(String msg) { accumulateInput(msg) }
 
-    // input2 pin
+    // input2 port
     public val (String)=>void input2 = [msg | input2(msg)]
     def input2(String msg) { accumulateInput(msg) }
     
-    // output pin    
-    public val output = new OutputPin<String>('''«this».output''', 
+    // output port    
+    public val output = new OutputPort<String>('''«this».output''', 
         [forwardIntegrationError]
     )
     

@@ -10,7 +10,7 @@ package class FunctionUnit {
     
     override toString() { this.name }
     
-    public val integrationError = new OutputPin<Exception>('integrationError',
+    public val integrationError = new OutputPort<Exception>('integrationError',
         [
             ex | println('FATAL ERROR: ' + ex.message)
         ]
@@ -26,7 +26,7 @@ package class FunctionUnit {
      * This method is used for connecting this function unit (if it has only one input pin) as 
      * flow target with another function unit without specifying the one and only input pin.
      */
-    def <T> (T)=>void getTheOneAndOnlyInputPin() {
+    def <T> (T)=>void getTheOneAndOnlyInputPort() {
         forwardIntegrationError(
             new UnsupportedOperationException(
                 "The function unit has more than one input pin or, " + 

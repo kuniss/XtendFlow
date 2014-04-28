@@ -4,16 +4,16 @@ package class ToUpper extends FunctionUnit {
     
     new() { super('ToUpper') }
     
-    // input pin
+    // input port
     public val (String)=>void input = [msg | input(msg)]
     def input(String msg) { processInput(msg) }
 
-    // output pin    
-    public val output = new OutputPin<String>('''«this».output''', 
+    // output port    
+    public val output = new OutputPort<String>('''«this».output''', 
         [forwardIntegrationError]
     )
 
-    override (String)=>void getTheOneAndOnlyInputPin() {
+    override (String)=>void getTheOneAndOnlyInputPort() {
         return input;
     }
 

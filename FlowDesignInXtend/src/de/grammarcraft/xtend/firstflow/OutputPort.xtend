@@ -3,7 +3,7 @@ package de.grammarcraft.xtend.firstflow
 import java.util.ArrayList
 import java.util.List
 
-package class OutputPin<MessageType> {
+package class OutputPort<MessageType> {
     
     String name
     (Exception)=>void errorOperation
@@ -38,7 +38,7 @@ package class OutputPin<MessageType> {
     // convenient operator for connecting to function units defining one and only one input pin:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo(FunctionUnit fu) {
-        outputOperations.add(fu.theOneAndOnlyInputPin)
+        outputOperations.add(fu.theOneAndOnlyInputPort)
     }
     
 }

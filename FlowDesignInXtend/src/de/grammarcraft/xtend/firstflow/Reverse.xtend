@@ -4,12 +4,12 @@ package class Reverse extends FunctionUnit {
     
     new() { super("Reverse") }
     
-    // input pins
+    // input port
     public val (String)=>void input = [msg | processInput(msg)]
     def input(String msg) { processInput(msg) }
 
-    // output pins    
-    public val output = new OutputPin<String>('''«this».output''', 
+    // output port    
+    public val output = new OutputPort<String>('''«this».output''', 
         [forwardIntegrationError]
     )
 
@@ -23,7 +23,7 @@ package class Reverse extends FunctionUnit {
     // and, connecting it to function units having one and only one input pin:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo(FunctionUnit fu) {
-        output -> fu.theOneAndOnlyInputPin
+        output -> fu.theOneAndOnlyInputPort
     }
     
     // This method implements the semantic of the function unit      
