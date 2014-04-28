@@ -15,33 +15,33 @@ class FunctionUnitTest {
 
     extension XtendCompilerTester compilerTester = XtendCompilerTester.newXtendCompilerTester(FunctionUnit)
     
-    private def String interfaceName(String className, String inputPinName) '''«className»_InputPin_«inputPinName»'''
+    private def String interfaceName(String className, String inputPortName) '''«className»_InputPort_«inputPortName»'''
 
-    private def String processMethodName(String inputPinName) '''process«inputPinName.toFirstUpper»'''
+    private def String processMethodName(String inputPortName) '''process«inputPortName.toFirstUpper»'''
     
-    @Test def void test_String_typed_pins() {
+    @Test def void test_String_typed_ports() {
         val className = 'MyFunctionUnit'
-        val inputPinName = 'input'
-        val inputPinTypeName = 'String'
-        val outputPinName = 'output'
-        val outputPinTypeName = 'String'
+        val inputPortName = 'input'
+        val inputPortTypeName = 'String'
+        val outputPortName = 'output'
+        val outputPortTypeName = 'String'
         '''
             import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPin
-            import de.grammarcraft.xtend.flow.annotations.InputPin
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
         
             @FunctionUnit(
-                inputPins = #[
-                    @InputPin(name="«inputPinName»", type=«inputPinTypeName»)
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
-                outputPins = #[
-                    @OutputPin(name="«outputPinName»", type=«outputPinTypeName»)
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
             
-                override «inputPinName.processMethodName»(«inputPinTypeName» msg) {
-                    «outputPinName».forward(msg.toUpperCase);
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName».forward(msg.toUpperCase);
                 }
                 
             }
@@ -49,44 +49,44 @@ class FunctionUnitTest {
             val extension ctx = transformationContext
 
             val clazz = findClass(className)
-            val inputPinType = String.newTypeReference
-            val outputPinType = String.newTypeReference
+            val inputPortType = String.newTypeReference
+            val outputPortType = String.newTypeReference
             
-            assertEquals(inputPinTypeName, inputPinType.toString)
-            assertEquals(outputPinTypeName, outputPinType.toString)
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
 
-            assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
-            assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
-            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
-            assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
     }
     
-    @Test def void test_unusal_named_pins() {
+    @Test def void test_unusal_named_ports() {
         val className = 'Funktionseinheit'
-        val inputPinName = 'eingabe'
-        val inputPinTypeName = 'String'
-        val outputPinName = 'ausgabe'
-        val outputPinTypeName = 'String'
+        val inputPortName = 'eingabe'
+        val inputPortTypeName = 'String'
+        val outputPortName = 'ausgabe'
+        val outputPortTypeName = 'String'
         '''
             import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPin
-            import de.grammarcraft.xtend.flow.annotations.InputPin
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
         
             @FunctionUnit(
-                inputPins = #[
-                    @InputPin(name="«inputPinName»", type=«inputPinTypeName»)
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
-                outputPins = #[
-                    @OutputPin(name="«outputPinName»", type=«outputPinTypeName»)
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
             
-                override «inputPinName.processMethodName»(«inputPinTypeName» msg) {
-                    «outputPinName».forward(msg.toUpperCase);
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName».forward(msg.toUpperCase);
                 }
                 
             }
@@ -94,44 +94,44 @@ class FunctionUnitTest {
             val extension ctx = transformationContext
 
             val clazz = findClass(className)
-            val inputPinType = String.newTypeReference
-            val outputPinType = String.newTypeReference
+            val inputPortType = String.newTypeReference
+            val outputPortType = String.newTypeReference
             
-            assertEquals(inputPinTypeName, inputPinType.toString)
-            assertEquals(outputPinTypeName, outputPinType.toString)
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
 
-            assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
-            assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
-            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
-            assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
     }
 
-    @Test def void test_Integer_typed_pins() {
+    @Test def void test_Integer_typed_ports() {
         val className = 'MyFunctionUnit'
-        val inputPinName = 'input'
-        val inputPinTypeName = 'Integer'
-        val outputPinName = 'output'
-        val outputPinTypeName = 'Integer'
+        val inputPortName = 'input'
+        val inputPortTypeName = 'Integer'
+        val outputPortName = 'output'
+        val outputPortTypeName = 'Integer'
         '''
             import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPin
-            import de.grammarcraft.xtend.flow.annotations.InputPin
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
         
             @FunctionUnit(
-                inputPins = #[
-                    @InputPin(name="«inputPinName»", type=«inputPinTypeName»)
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
-                outputPins = #[
-                    @OutputPin(name="«outputPinName»", type=«outputPinTypeName»)
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
             
-                override «inputPinName.processMethodName»(«inputPinTypeName» msg) {
-                    «outputPinName».forward(msg);
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName».forward(msg);
                 }
                 
             }
@@ -139,102 +139,102 @@ class FunctionUnitTest {
             val extension ctx = transformationContext
 
             val clazz = findClass(className)
-            val inputPinType = Integer.newTypeReference
-            val outputPinType = Integer.newTypeReference
+            val inputPortType = Integer.newTypeReference
+            val outputPortType = Integer.newTypeReference
             
-            assertEquals(inputPinTypeName, inputPinType.toString)
-            assertEquals(outputPinTypeName, outputPinType.toString)
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
 
-            assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
-            assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
-            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
-            assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
-            
-        ]
-    }
-    
-    @Test def void test_2_input_pins() {
-        val className = 'MyFunctionUnit'
-        val inputPinName = 'input'
-        val inputPinTypeName = 'String'
-        val inputPin2Name = 'input2'
-        val inputPin2TypeName = 'Integer'
-        val outputPinName = 'output'
-        val outputPinTypeName = 'String'
-        '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPin
-            import de.grammarcraft.xtend.flow.annotations.InputPin
-        
-            @FunctionUnit(
-                inputPins = #[
-                    @InputPin(name="«inputPinName»", type=«inputPinTypeName»),
-                    @InputPin(name="«inputPin2Name»", type=«inputPin2TypeName»)
-                ],
-                outputPins = #[
-                    @OutputPin(name="«outputPinName»", type=«outputPinTypeName»)
-                ]
-            )
-            class «className» {
-            
-                override «inputPinName.processMethodName»(«inputPinTypeName» msg) {
-                    «outputPinName».forward(msg);
-                }
-                
-                override «inputPin2Name.processMethodName»(«inputPin2TypeName» msg) {
-                    «outputPinName».forward(«inputPin2TypeName».toString(msg));
-                }
-            }
-        '''.compile [
-            val extension ctx = transformationContext
-
-            val clazz = findClass(className)
-            val inputPinType = String.newTypeReference
-            val inputPin2Type = Integer.newTypeReference
-            val outputPinType = String.newTypeReference
-            
-            assertEquals(inputPinTypeName, inputPinType.toString)
-            assertEquals(inputPin2TypeName, inputPin2Type.toString)
-            assertEquals(outputPinTypeName, outputPinType.toString)
-
-            assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
-            assertInputPinGenerated(inputPin2Name, inputPin2Type, className, clazz, ctx)            
-            assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
-            
-            assertTheOneAndOnlyInputPinCanonicalMethodNOTGenerated(className, inputPinType, clazz, ctx)
-            assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
     }
     
-        @Test def void test_2_output_pins() {
+    @Test def void test_2_input_ports() {
         val className = 'MyFunctionUnit'
-        val inputPinName = 'input'
-        val inputPinTypeName = 'String'
-        val outputPinName = 'output'
-        val outputPinTypeName = 'String'
-        val output2PinName = 'output2'
-        val output2PinTypeName = 'String'
+        val inputPortName = 'input'
+        val inputPortTypeName = 'String'
+        val inputPort2Name = 'input2'
+        val inputPort2TypeName = 'Integer'
+        val outputPortName = 'output'
+        val outputPortTypeName = 'String'
         '''
             import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPin
-            import de.grammarcraft.xtend.flow.annotations.InputPin
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
         
             @FunctionUnit(
-                inputPins = #[
-                    @InputPin(name="«inputPinName»", type=«inputPinTypeName»)
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»),
+                    @InputPort(name="«inputPort2Name»", type=«inputPort2TypeName»)
                 ],
-                outputPins = #[
-                    @OutputPin(name="«outputPinName»", type=«outputPinTypeName»),
-                    @OutputPin(name="«output2PinName»", type=«output2PinTypeName»)
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
             
-                override «inputPinName.processMethodName»(«inputPinTypeName» msg) {
-                    «outputPinName».forward(msg.toUpperCase);
-                    «output2PinName».forward(msg.toLowerCase);
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName».forward(msg);
+                }
+                
+                override «inputPort2Name.processMethodName»(«inputPort2TypeName» msg) {
+                    «outputPortName».forward(«inputPort2TypeName».toString(msg));
+                }
+            }
+        '''.compile [
+            val extension ctx = transformationContext
+
+            val clazz = findClass(className)
+            val inputPortType = String.newTypeReference
+            val inputPort2Type = Integer.newTypeReference
+            val outputPortType = String.newTypeReference
+            
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(inputPort2TypeName, inputPort2Type.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
+
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertInputPortGenerated(inputPort2Name, inputPort2Type, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
+            
+            assertTheOneAndOnlyInputPortCanonicalMethodNOTGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
+            
+        ]
+    }
+    
+        @Test def void test_2_output_ports() {
+        val className = 'MyFunctionUnit'
+        val inputPortName = 'input'
+        val inputPortTypeName = 'String'
+        val outputPortName = 'output'
+        val outputPortTypeName = 'String'
+        val output2PortName = 'output2'
+        val output2PortTypeName = 'String'
+        '''
+            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
+        
+            @FunctionUnit(
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                ],
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»),
+                    @OutputPort(name="«output2PortName»", type=«output2PortTypeName»)
+                ]
+            )
+            class «className» {
+            
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName».forward(msg.toUpperCase);
+                    «output2PortName».forward(msg.toLowerCase);
                 }
                 
             }
@@ -242,51 +242,51 @@ class FunctionUnitTest {
             val extension ctx = transformationContext
 
             val clazz = findClass(className)
-            val inputPinType = String.newTypeReference
-            val outputPinType = String.newTypeReference
-            val output2PinType = String.newTypeReference
+            val inputPortType = String.newTypeReference
+            val outputPortType = String.newTypeReference
+            val output2PortType = String.newTypeReference
             
-            assertEquals(inputPinTypeName, inputPinType.toString)
-            assertEquals(outputPinTypeName, outputPinType.toString)
-            assertEquals(output2PinTypeName, output2PinType.toString)
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
+            assertEquals(output2PortTypeName, output2PortType.toString)
 
-            assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
-            assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
-            assertOutputPinGenerated(output2PinName, output2PinType, className, clazz, ctx)
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
+            assertOutputPortGenerated(output2PortName, output2PortType, className, clazz, ctx)
             
-            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorNOTGenerated(className, clazz, ctx)
             
         ]
     }
     
-        @Test def void test_complex_typed_pins() {
+        @Test def void test_complex_typed_ports() {
         val className = 'MyFunctionUnit'
-        val inputPinName = 'input'
-        val inputPinTypeName = 'Map'
-        val inputPinTypeParameters = 'Integer, String' 
-        val outputPinName = 'output'
-        val outputPinTypeName = 'Set'
-        val outputPinTypeParameters = 'Integer' 
+        val inputPortName = 'input'
+        val inputPortTypeName = 'Map'
+        val inputPortTypeParameters = 'Integer, String' 
+        val outputPortName = 'output'
+        val outputPortTypeName = 'Set'
+        val outputPortTypeParameters = 'Integer' 
         '''
             import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPin
-            import de.grammarcraft.xtend.flow.annotations.InputPin
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
             import java.util.Set
             import java.util.Map
         
             @FunctionUnit(
-                inputPins = #[
-                    @InputPin(name="«inputPinName»", type=«inputPinTypeName», typeParameters=#[«inputPinTypeParameters»])
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName», typeParameters=#[«inputPortTypeParameters»])
                 ],
-                outputPins = #[
-                    @OutputPin(name="«outputPinName»", type=«outputPinTypeName», typeParameters=#[«outputPinTypeParameters»])
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName», typeParameters=#[«outputPortTypeParameters»])
                 ]
             )
             class «className» {
             
-                override «inputPinName.processMethodName»(«inputPinTypeName» msg) {
-                    «outputPinName».forward(msg.keySet);
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName».forward(msg.keySet);
                 }
                 
             }
@@ -294,17 +294,17 @@ class FunctionUnitTest {
             val extension ctx = transformationContext
 
             val clazz = findClass(className)
-            val inputPinType = Map.newTypeReference(Integer.newTypeReference, String.newTypeReference)
-            val outputPinType = Set.newTypeReference(Integer.newTypeReference)
+            val inputPortType = Map.newTypeReference(Integer.newTypeReference, String.newTypeReference)
+            val outputPortType = Set.newTypeReference(Integer.newTypeReference)
             
-            assertEquals('''«inputPinTypeName»<«inputPinTypeParameters»>'''.toString, inputPinType.toString)
-            assertEquals('''«outputPinTypeName»<«outputPinTypeParameters»>'''.toString, outputPinType.toString)
+            assertEquals('''«inputPortTypeName»<«inputPortTypeParameters»>'''.toString, inputPortType.toString)
+            assertEquals('''«outputPortTypeName»<«outputPortTypeParameters»>'''.toString, outputPortType.toString)
 
-            assertInputPinGenerated(inputPinName, inputPinType, className, clazz, ctx)            
-            assertOutputPinGenerated(outputPinName, outputPinType, className, clazz, ctx)
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
-            assertTheOneAndOnlyInputPinCanonicalMethodGenerated(className, inputPinType, clazz, ctx)
-            assertMappedToOperatorGenerated(className, outputPinType, clazz, ctx)
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
     }
@@ -312,67 +312,67 @@ class FunctionUnitTest {
     
     
     
-    private def assertInputPinGenerated(String inputPinName, TypeReference inputPinType, String className, 
+    private def assertInputPortGenerated(String inputPortName, TypeReference inputPortType, String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
-        val interf = findInterface(className.interfaceName(inputPinName))
+        val interf = findInterface(className.interfaceName(inputPortName))
         
-        // input pins
-        assertTrue('''class '«className»' does not implement required interface '«className.interfaceName(inputPinName)»' ''', 
+        // input ports
+        assertTrue('''class '«className»' does not implement required interface '«className.interfaceName(inputPortName)»' ''', 
             clazz.implementedInterfaces.exists[it.name == interf.qualifiedName]
         )
         
-        assertTrue('''method '«inputPinName.processMethodName»' does not exist at «className.interfaceName(inputPinName)»''', 
-            interf.declaredMethods.exists[simpleName == inputPinName.processMethodName]
+        assertTrue('''method '«inputPortName.processMethodName»' does not exist at «className.interfaceName(inputPortName)»''', 
+            interf.declaredMethods.exists[simpleName == inputPortName.processMethodName]
         )
-        interf.declaredMethods.filter[simpleName == inputPinName.processMethodName ].head => [
-            assertEquals('''method '«simpleName»' has not exactly one parameter at «className.interfaceName(inputPinName)»''',
+        interf.declaredMethods.filter[simpleName == inputPortName.processMethodName ].head => [
+            assertEquals('''method '«simpleName»' has not exactly one parameter at «className.interfaceName(inputPortName)»''',
                 1, parameters.size
             )
-            assertEquals('''method '«simpleName»' parameter is not of type «inputPinType» at «className.interfaceName(inputPinName)»''', 
-                inputPinType, parameters.head.type
+            assertEquals('''method '«simpleName»' parameter is not of type «inputPortType» at «className.interfaceName(inputPortName)»''', 
+                inputPortType, parameters.head.type
             )
         ]
         
-        assertTrue('''method '«inputPinName»' does not exist at «className»''', 
-            clazz.declaredMethods.exists[simpleName == inputPinName]
+        assertTrue('''method '«inputPortName»' does not exist at «className»''', 
+            clazz.declaredMethods.exists[simpleName == inputPortName]
         )
-        assertTrue('''field '«inputPinName»' does not exist at «className»''', 
-            clazz.declaredFields.exists[simpleName == inputPinName]
+        assertTrue('''field '«inputPortName»' does not exist at «className»''', 
+            clazz.declaredFields.exists[simpleName == inputPortName]
         )
-        assertTrue('''method '«inputPinName.processMethodName»' does not exist at «className»''', 
-            clazz.declaredMethods.exists[simpleName == inputPinName.processMethodName]
+        assertTrue('''method '«inputPortName.processMethodName»' does not exist at «className»''', 
+            clazz.declaredMethods.exists[simpleName == inputPortName.processMethodName]
         )
         
-        clazz.declaredMethods.filter[simpleName == inputPinName ].head => [
+        clazz.declaredMethods.filter[simpleName == inputPortName ].head => [
             assertEquals('''method '«simpleName»' has not exactly one parameter''', 
                 1, parameters.size
             )
-            assertEquals('''method '«simpleName»' parameter is not of type «inputPinType»''', 
-                inputPinType, parameters.head.type
+            assertEquals('''method '«simpleName»' parameter is not of type «inputPortType»''', 
+                inputPortType, parameters.head.type
             )
         ]
-        clazz.declaredFields.filter[simpleName == inputPinName].head => [
-            assertEquals('''field '«simpleName»' is not of type «Procedures.Procedure1.newTypeReference(inputPinType.newWildcardTypeReferenceWithLowerBound)»''', 
-                Procedures.Procedure1.newTypeReference(inputPinType.newWildcardTypeReferenceWithLowerBound), type
+        clazz.declaredFields.filter[simpleName == inputPortName].head => [
+            assertEquals('''field '«simpleName»' is not of type «Procedures.Procedure1.newTypeReference(inputPortType.newWildcardTypeReferenceWithLowerBound)»''', 
+                Procedures.Procedure1.newTypeReference(inputPortType.newWildcardTypeReferenceWithLowerBound), type
             )
         ]
     }
     
-    private def assertOutputPinGenerated(String outputPinName, TypeReference outputPinType, String className, 
+    private def assertOutputPortGenerated(String outputPortName, TypeReference outputPortType, String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
-        assertTrue('''field '«outputPinName»' does not exist''', 
-            clazz.declaredFields.exists[simpleName == outputPinName]
+        assertTrue('''field '«outputPortName»' does not exist''', 
+            clazz.declaredFields.exists[simpleName == outputPortName]
         )
-        clazz.declaredFields.filter[simpleName == outputPinName].head => [
-            assertEquals('''field '«simpleName»' is not of type «de.grammarcraft.xtend.flow.OutputPin.newTypeReference(outputPinType)»''', 
-                de.grammarcraft.xtend.flow.OutputPin.newTypeReference(outputPinType), type
+        clazz.declaredFields.filter[simpleName == outputPortName].head => [
+            assertEquals('''field '«simpleName»' is not of type «de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType)»''', 
+                de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType), type
             )
         ]
     }
 
-    private def assertMappedToOperatorGenerated(String className, TypeReference outputPinType,
+    private def assertMappedToOperatorGenerated(String className, TypeReference outputPortType,
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
         assertTrue('''operator -> (operator_mappedTo) does not exist at «className»''',
@@ -390,7 +390,7 @@ class FunctionUnitTest {
                 1, parameters.size
             )
             assertEquals('''method '«simpleName»' parameter is not of type «Procedures.Procedure1.newTypeReference»''', 
-                Procedures.Procedure1.newTypeReference(outputPinType.newWildcardTypeReferenceWithLowerBound), 
+                Procedures.Procedure1.newTypeReference(outputPortType.newWildcardTypeReferenceWithLowerBound), 
                 parameters.head.type
             )
         ]
@@ -405,26 +405,26 @@ class FunctionUnitTest {
     }
 
 
-    private def assertTheOneAndOnlyInputPinCanonicalMethodGenerated(String className, TypeReference outputPinType,
+    private def assertTheOneAndOnlyInputPortCanonicalMethodGenerated(String className, TypeReference outputPortType,
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
-        assertTrue('''canonical method 'theOneAndOnlyInputPin' is not overridden at «className»''',
-            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPin']
+        assertTrue('''canonical method 'theOneAndOnlyInputPort' is not overridden at «className»''',
+            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPort']
         )
-        clazz.declaredMethods.filter[simpleName == 'getTheOneAndOnlyInputPin'].head => [
+        clazz.declaredMethods.filter[simpleName == 'getTheOneAndOnlyInputPort'].head => [
             assertTrue('''method '«simpleName»' must not have parameters''', parameters.empty)
             assertEquals('''method '«simpleName»' return type is not «Procedures.Procedure1.newTypeReference»''', 
-                Procedures.Procedure1.newTypeReference(outputPinType.newWildcardTypeReferenceWithLowerBound), 
+                Procedures.Procedure1.newTypeReference(outputPortType.newWildcardTypeReferenceWithLowerBound), 
                 returnType
             )
         ]
     }
     
-    private def assertTheOneAndOnlyInputPinCanonicalMethodNOTGenerated(String className, TypeReference outputPinType,
+    private def assertTheOneAndOnlyInputPortCanonicalMethodNOTGenerated(String className, TypeReference outputPortType,
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
-        assertFalse('''canonical method 'theOneAndOnlyInputPin' must NOT not exist at «className», but is there''',
-            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPin']
+        assertFalse('''canonical method 'theOneAndOnlyInputPort' must NOT not exist at «className», but is there''',
+            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPort']
         )
     }
     

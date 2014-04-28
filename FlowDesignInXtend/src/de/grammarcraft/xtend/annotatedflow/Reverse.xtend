@@ -1,15 +1,15 @@
 package de.grammarcraft.xtend.annotatedflow
 
-import de.grammarcraft.xtend.flow.annotations.InputPin
 import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-import de.grammarcraft.xtend.flow.annotations.OutputPin
+import de.grammarcraft.xtend.flow.annotations.InputPort
+import de.grammarcraft.xtend.flow.annotations.OutputPort
 
 @FunctionUnit(
-    inputPins = #[
-        @InputPin(name="input", type=String)
+    inputPorts = #[
+        @InputPort(name="input", type=String)
     ],
-    outputPins = #[
-        @OutputPin(name="output", type=String)
+    outputPorts = #[
+        @OutputPort(name="output", type=String)
     ]
 )
 class Reverse {

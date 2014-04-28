@@ -17,7 +17,7 @@ package class ToLower extends FunctionUnit {
         return input;
     }
 
-    // convenient operator for function units defining one and only one output pin:
+    // convenient operator for function units defining one and only one output port:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo((String)=>void operation) {
         output -> operation

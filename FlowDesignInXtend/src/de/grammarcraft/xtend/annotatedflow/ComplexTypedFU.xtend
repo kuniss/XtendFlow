@@ -1,16 +1,16 @@
 package de.grammarcraft.xtend.annotatedflow
 
 import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-import de.grammarcraft.xtend.flow.annotations.InputPin
-import de.grammarcraft.xtend.flow.annotations.OutputPin
 import java.util.List
+import de.grammarcraft.xtend.flow.annotations.InputPort
+import de.grammarcraft.xtend.flow.annotations.OutputPort
 
 @FunctionUnit(
-        inputPins = #[
-            @InputPin(name="input", type=List, typeParameters=#[String])
+        inputPorts = #[
+            @InputPort(name="input", type=List, typeParameters=#[String])
         ],
-        outputPins = #[
-            @OutputPin(name="output", type=List, typeParameters=#[String])
+        outputPorts = #[
+            @OutputPort(name="output", type=List, typeParameters=#[String])
         ]
     )
 class ComplextypedFU {

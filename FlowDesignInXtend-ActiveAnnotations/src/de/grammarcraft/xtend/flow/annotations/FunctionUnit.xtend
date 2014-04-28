@@ -14,17 +14,17 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 @Active(FunctionUnitProcessor)
 annotation FunctionUnit {
     // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
-    InputPin[] inputPins = #[]
-    OutputPin[] outputPins = #[]
+    InputPort[] inputPorts = #[]
+    OutputPort[] outputPorts = #[]
 }
 
-annotation InputPin {
+annotation InputPort {
     String name
     Class<?> type
     Class<?>[] typeParameters = #[]
 }
 
-annotation OutputPin {
+annotation OutputPort {
     String name
     Class<?> type
     Class<?>[] typeParameters = #[]
@@ -32,60 +32,60 @@ annotation OutputPin {
 
 class FunctionUnitProcessor extends AbstractClassProcessor {
     
-    Iterable<? extends AnnotationReference> inputPinAnnotations
-    Iterable<? extends AnnotationReference> outputPinAnnotations
+    Iterable<? extends AnnotationReference> inputPortAnnotations
+    Iterable<? extends AnnotationReference> outputPortAnnotations
     Iterable<? extends AnnotationReference> doubledInputAnnotations
     Iterable<? extends AnnotationReference> doubledOutputAnnotations
     
-    Object inputPinAnnotationArgument
-    Object outputPinAnnotationArgument
+    Object inputPortAnnotationArgument
+    Object outputPortAnnotationArgument
     
         
     override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
         val functionUnitAnnotation = annotatedClass.annotations?.findFirst[annotationTypeDeclaration.simpleName == 'FunctionUnit']
 
-        inputPinAnnotationArgument = functionUnitAnnotation?.getValue("inputPins")
-        if (inputPinAnnotationArgument?.class == typeof(AnnotationReference[])) {
-            inputPinAnnotations = inputPinAnnotationArgument as AnnotationReference[]
-            doubledInputAnnotations = inputPinAnnotations.doubledAnnotations
+        inputPortAnnotationArgument = functionUnitAnnotation?.getValue("inputPorts")
+        if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
+            inputPortAnnotations = inputPortAnnotationArgument as AnnotationReference[]
+            doubledInputAnnotations = inputPortAnnotations.doubledAnnotations
             
             if (doubledInputAnnotations.empty)
-                inputPinAnnotations.forEach[ inputPinAnnotation |
+                inputPortAnnotations.forEach[ inputPortAnnotation |
                     context.registerInterface(
-                        getInputPinInterfaceName(annotatedClass, inputPinAnnotation)
+                        getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
                     )
                 ]
         }
         
-        outputPinAnnotationArgument = functionUnitAnnotation?.getValue("outputPins")
-        if (outputPinAnnotationArgument?.class == typeof(AnnotationReference[])) {
-            outputPinAnnotations = outputPinAnnotationArgument  as AnnotationReference[]
-            doubledOutputAnnotations = outputPinAnnotations.doubledAnnotations
+        outputPortAnnotationArgument = functionUnitAnnotation?.getValue("outputPorts")
+        if (outputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
+            outputPortAnnotations = outputPortAnnotationArgument  as AnnotationReference[]
+            doubledOutputAnnotations = outputPortAnnotations.doubledAnnotations
         }
     }
     
-    private static def String getInputPinInterfaceName(ClassDeclaration annotatedClass, AnnotationReference inputPinAnnotation) {
-        '''«annotatedClass.qualifiedName»_InputPin_«inputPinAnnotation.pinName»'''
+    private static def String getInputPortInterfaceName(ClassDeclaration annotatedClass, AnnotationReference inputPortAnnotation) {
+        '''«annotatedClass.qualifiedName»_InputPort_«inputPortAnnotation.portName»'''
     }
 
-    private static def String pinName(AnnotationReference annotationReference) {
+    private static def String portName(AnnotationReference annotationReference) {
         (annotationReference.getValue("name") as String).trim
     }
     
-    private static def TypeReference pinType(AnnotationReference annotationReference) {
+    private static def TypeReference portType(AnnotationReference annotationReference) {
         annotationReference.getValue("type") as TypeReference
     }
     
-    private static def TypeReference[] pinTypeParameters(AnnotationReference annotationReference) {
+    private static def TypeReference[] portTypeParameters(AnnotationReference annotationReference) {
         annotationReference.getValue("typeParameters") as TypeReference[]
     }
     
-    private static def doubledAnnotations(Iterable<? extends AnnotationReference> pinAnnotations) {
-        pinAnnotations.filter[doubledAnnotation(pinAnnotations)]
+    private static def doubledAnnotations(Iterable<? extends AnnotationReference> portAnnotations) {
+        portAnnotations.filter[doubledAnnotation(portAnnotations)]
     }
     
-    private static def doubledAnnotation(AnnotationReference pinAnnotation, Iterable<? extends AnnotationReference> pinAnnotations) {
-        pinAnnotations.filter[pinName == pinAnnotation.pinName].size > 1
+    private static def doubledAnnotation(AnnotationReference portAnnotation, Iterable<? extends AnnotationReference> portAnnotations) {
+        portAnnotations.filter[portName == portAnnotation.portName].size > 1
     }
     
     
@@ -95,7 +95,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         hasContextErrors = checkForContextErrors(context, annotatedClass)
         
         if (hasContextErrors) {
-            annotatedClass.addWarning("due to pin annotation errors, no code can be generated")
+            annotatedClass.addWarning("due to port annotation errors, no code can be generated")
             return            
         }
             
@@ -107,22 +107,22 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                     
         extendConstructor(annotatedClass)
 
-        addInputPins(annotatedClass, context) 
+        addInputPorts(annotatedClass, context) 
         
-        addOutputPins(annotatedClass, context)
+        addOutputPorts(annotatedClass, context)
     }
     
     
     private def checkForContextErrors(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
         var boolean contextError = false
         
-        if (inputPinAnnotationArgument?.class != typeof(AnnotationReference[])) {
-            annotatedClass.addError("array of input pin annotations expected")
+        if (inputPortAnnotationArgument?.class != typeof(AnnotationReference[])) {
+            annotatedClass.addError("array of input port annotations expected")
             contextError = true            
         }
         
-        if (outputPinAnnotationArgument?.class != typeof(AnnotationReference[])) {
-            annotatedClass.addError("array of output pin annotations expected")
+        if (outputPortAnnotationArgument?.class != typeof(AnnotationReference[])) {
+            annotatedClass.addError("array of output port annotations expected")
             contextError = true            
         }
         
@@ -130,14 +130,14 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         
         if (!doubledInputAnnotations.empty) {
             doubledInputAnnotations.forEach[
-                annotatedClass.addError('''input pin "«pinName»" is declared twice''')
+                annotatedClass.addError('''input port "«portName»" is declared twice''')
             ]
             contextError = true            
         }
 
         if (!doubledOutputAnnotations.empty) {
             doubledOutputAnnotations.forEach[
-                annotatedClass.addError('''output pin "«pinName»" is declared twice''')
+                annotatedClass.addError('''output port "«portName»" is declared twice''')
             ]
             contextError = true            
         }
@@ -146,11 +146,11 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     }
 
     private def checkForContextWarnings(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
-        if (inputPinAnnotations.empty)
-            annotatedClass.addWarning("no input pin defined")
+        if (inputPortAnnotations.empty)
+            annotatedClass.addWarning("no input port defined")
         
-        if (outputPinAnnotations.empty)
-            annotatedClass.addWarning("no output pin defined")
+        if (outputPortAnnotations.empty)
+            annotatedClass.addWarning("no output port defined")
     }
     
     private static def extendConstructor(MutableClassDeclaration annotatedClass) {
@@ -174,14 +174,14 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         }
     }
     
-    private def addInputPins(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-        inputPinAnnotations.forEach[ inputPinAnnotation |
+    private def addInputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        inputPortAnnotations.forEach[ inputPortAnnotation |
                 
-            val pinName = inputPinAnnotation.pinName
-            val inputPinInterfaceName = getInputPinInterfaceName(annotatedClass, inputPinAnnotation)
-            val msgType = inputPinAnnotation.pinType.type.newTypeReference(inputPinAnnotation.pinTypeParameters)
+            val portName = inputPortAnnotation.portName
+            val inputPortInterfaceName = getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
+            val msgType = inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
             
-            annotatedClass.addField(pinName, [
+            annotatedClass.addField(portName, [
                 final = true
                 visibility = Visibility::PUBLIC
                 type = Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
@@ -190,7 +190,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                         public org.eclipse.xtext.xbase.lib.Procedures.Procedure1<? super «msgType»> apply() {
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
                             public void apply(final «msgType» msg) {
-                              «annotatedClass.simpleName».this.«pinName»(msg);
+                              «annotatedClass.simpleName».this.«portName»(msg);
                             }
                           };
                           return _function;
@@ -199,35 +199,35 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ''']
             ])
             
-            val processInputMethodName = '''process«pinName.toFirstUpper»'''
+            val processInputMethodName = '''process«portName.toFirstUpper»'''
             val msgParameterName = 'msg'
-            annotatedClass.addMethod(pinName, [
+            annotatedClass.addMethod(portName, [
                 final = true
                 addParameter(msgParameterName, msgType)
                 body = ['''«processInputMethodName»(«msgParameterName»);''']
             ])
             
             // add the interface to the list of implemented interfaces
-            val interfaceType = findInterface(inputPinInterfaceName)
+            val interfaceType = findInterface(inputPortInterfaceName)
             annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[interfaceType.newTypeReference]
             
             interfaceType.addMethod(processInputMethodName) [
                 docComment = '''
-                    Implement this method to process input arriving via input pin "«pinName»".
+                    Implement this method to process input arriving via input port "«portName»".
                     Message coming in have type "«msgType»".
                 '''
                 addParameter(msgParameterName, msgType)
             ]
             
-            // override the canonical function unit base method getTheOneAndOnlyInputPin for returning
-            // the procedure assigned to this one and only input pin
-            if (inputPinAnnotations.size == 1) {
-                annotatedClass.addMethod('getTheOneAndOnlyInputPin', 
+            // override the canonical function unit base method getTheOneAndOnlyInputPort for returning
+            // the procedure assigned to this one and only input port
+            if (inputPortAnnotations.size == 1) {
+                annotatedClass.addMethod('getTheOneAndOnlyInputPort', 
                         [
                             returnType = 
                                 Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
                             body = ['''
-                                return this.«pinName»;
+                                return this.«portName»;
                             ''']
                         ]
                 )
@@ -236,48 +236,48 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         ]
     }
     
-    private def addOutputPins(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-        outputPinAnnotations.forEach[ outputPinAnnotation |
-            val pinName = outputPinAnnotation.pinName
-            val msgType = outputPinAnnotation.pinType.type.newTypeReference(outputPinAnnotation.pinTypeParameters)
+    private def addOutputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        outputPortAnnotations.forEach[ outputPortAnnotation |
+            val portName = outputPortAnnotation.portName
+            val msgType = outputPortAnnotation.portType.type.newTypeReference(outputPortAnnotation.portTypeParameters)
                         
-            // add output pin
-            annotatedClass.addField(pinName, [
+            // add output port
+            annotatedClass.addField(portName, [
                 final = true
                 visibility = Visibility::PUBLIC
-                type = de.grammarcraft.xtend.flow.OutputPin.newTypeReference(msgType)
+                type = de.grammarcraft.xtend.flow.OutputPort.newTypeReference(msgType)
                 initializer = ['''
-                  new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.OutputPin<«msgType»>>() {
-                      public de.grammarcraft.xtend.flow.OutputPin<«msgType»> apply() {
+                  new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.OutputPort<«msgType»>>() {
+                      public de.grammarcraft.xtend.flow.OutputPort<«msgType»> apply() {
                           org.eclipse.xtend2.lib.StringConcatenation _builder = new org.eclipse.xtend2.lib.StringConcatenation();
                           _builder.append(«annotatedClass.simpleName».this, "");
-                          _builder.append(".«pinName»");
+                          _builder.append(".«portName»");
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception>() {
                             public void apply(final Exception it) {
                               «annotatedClass.simpleName».this.forwardIntegrationError(it);
                             }
                           };
-                          de.grammarcraft.xtend.flow.OutputPin<«msgType»> _outputPin = new de.grammarcraft.xtend.flow.OutputPin<«msgType»>(_builder.toString(), _function);
-                          return _outputPin;
+                          de.grammarcraft.xtend.flow.OutputPort<«msgType»> _outputPort = new de.grammarcraft.xtend.flow.OutputPort<«msgType»>(_builder.toString(), _function);
+                          return _outputPort;
                       }
                   }.apply();
                 ''']
             ])
             
-            // add output connection operators -> if it is an one output pin only function unit
-            if (outputPinAnnotations.size == 1) {
+            // add output connection operators -> if it is an one output port only function unit
+            if (outputPortAnnotations.size == 1) {
                 annotatedClass.addMethod('operator_mappedTo', 
                     [
                         val operationType = 
                             Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
                         addParameter('operation', operationType)
-                        body = ['''this.«pinName».operator_mappedTo(operation);''']
+                        body = ['''this.«portName».operator_mappedTo(operation);''']
                     ]
                 )
                 annotatedClass.addMethod('operator_mappedTo', 
                     [
                         addParameter('fu', FunctionUnitBase.newTypeReference)
-                        body = ['''this.«pinName».operator_mappedTo(fu.<«msgType»>getTheOneAndOnlyInputPin());''']
+                        body = ['''this.«portName».operator_mappedTo(fu.<«msgType»>getTheOneAndOnlyInputPort());''']
                     ]
                 )                
             }

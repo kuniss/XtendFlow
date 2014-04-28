@@ -1,19 +1,19 @@
 package de.grammarcraft.xtend.annotatedflow
 
 import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-import de.grammarcraft.xtend.flow.annotations.InputPin
-import de.grammarcraft.xtend.flow.annotations.OutputPin
 import java.util.List
 import java.util.ArrayList
+import de.grammarcraft.xtend.flow.annotations.InputPort
+import de.grammarcraft.xtend.flow.annotations.OutputPort
 
 @FunctionUnit(
-    inputPins = #[
-        @InputPin(name="lower", type=String),
-        @InputPin(name="upper", type=String)
+    inputPorts = #[
+        @InputPort(name="lower", type=String),
+        @InputPort(name="upper", type=String)
     ],
-    outputPins = #[
-        @OutputPin(name="output", type=String),
-        @OutputPin(name="error", type=String)
+    outputPorts = #[
+        @OutputPort(name="output", type=String),
+        @OutputPort(name="error", type=String)
     ]
 )
 class Collector {

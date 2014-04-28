@@ -21,16 +21,16 @@ package class FunctionUnit {
     }
     
     /**
-     * Must be overridden by the derived function unit iff it has exactly one input pin, not more.
+     * Must be overridden by the derived function unit iff it has exactly one input port, not more.
      * By default it forwards and integration error and returns an doing-nothing method object.
-     * This method is used for connecting this function unit (if it has only one input pin) as 
-     * flow target with another function unit without specifying the one and only input pin.
+     * This method is used for connecting this function unit (if it has only one input port) as 
+     * flow target with another function unit without specifying the one and only input port.
      */
     def <T> (T)=>void getTheOneAndOnlyInputPort() {
         forwardIntegrationError(
             new UnsupportedOperationException(
-                "The function unit has more than one input pin or, " + 
-                "getTheOneAndOnlyInputPin() is not implemented.")
+                "The function unit has more than one input port or, " + 
+                "getTheOneAndOnlyInputPort() is not implemented.")
         )
         return [];
     }

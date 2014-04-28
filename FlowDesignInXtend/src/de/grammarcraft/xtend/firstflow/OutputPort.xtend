@@ -35,7 +35,7 @@ package class OutputPort<MessageType> {
         outputOperations.add(operation)
     }
 
-    // convenient operator for connecting to function units defining one and only one input pin:
+    // convenient operator for connecting to function units defining one and only one input port:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo(FunctionUnit fu) {
         outputOperations.add(fu.theOneAndOnlyInputPort)

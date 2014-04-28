@@ -13,14 +13,14 @@ package class Reverse extends FunctionUnit {
         [forwardIntegrationError]
     )
 
-    // convenient operator for function units defining one and only one output pin:
+    // convenient operator for function units defining one and only one output port:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo((String)=>void operation) {
         output -> operation
     }
     
-    // convenient operator for function units defining one and only one output pin 
-    // and, connecting it to function units having one and only one input pin:
+    // convenient operator for function units defining one and only one output port 
+    // and, connecting it to function units having one and only one input port:
     // defines operator "->", used as function unit connector
     def void operator_mappedTo(FunctionUnit fu) {
         output -> fu.theOneAndOnlyInputPort
