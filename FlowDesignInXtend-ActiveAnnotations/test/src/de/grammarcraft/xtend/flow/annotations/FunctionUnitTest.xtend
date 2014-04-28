@@ -277,10 +277,10 @@ class FunctionUnitTest {
         
             @FunctionUnit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName», typeParameters=#[«inputPortTypeParameters»])
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName», typeArguments=#[«inputPortTypeParameters»])
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName», typeParameters=#[«outputPortTypeParameters»])
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName», typeArguments=#[«outputPortTypeParameters»])
                 ]
             )
             class «className» {

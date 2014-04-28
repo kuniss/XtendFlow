@@ -7,10 +7,10 @@ import de.grammarcraft.xtend.flow.annotations.OutputPort
 
 @FunctionUnit(
         inputPorts = #[
-            @InputPort(name="input", type=List, typeParameters=#[String])
+            @InputPort(name="input", type=List, typeArguments=#[String])
         ],
         outputPorts = #[
-            @OutputPort(name="output", type=List, typeParameters=#[String])
+            @OutputPort(name="output", type=List, typeArguments=#[String])
         ]
     )
 class ComplextypedFU {

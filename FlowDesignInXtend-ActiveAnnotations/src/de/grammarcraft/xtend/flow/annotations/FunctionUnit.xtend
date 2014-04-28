@@ -21,13 +21,13 @@ annotation FunctionUnit {
 annotation InputPort {
     String name
     Class<?> type
-    Class<?>[] typeParameters = #[]
+    Class<?>[] typeArguments = #[]
 }
 
 annotation OutputPort {
     String name
     Class<?> type
-    Class<?>[] typeParameters = #[]
+    Class<?>[] typeArguments = #[]
 }
 
 class FunctionUnitProcessor extends AbstractClassProcessor {
@@ -77,7 +77,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     }
     
     private static def TypeReference[] portTypeParameters(AnnotationReference annotationReference) {
-        annotationReference.getValue("typeParameters") as TypeReference[]
+        annotationReference.getValue("typeArguments") as TypeReference[]
     }
     
     private static def doubledAnnotations(Iterable<? extends AnnotationReference> portAnnotations) {
