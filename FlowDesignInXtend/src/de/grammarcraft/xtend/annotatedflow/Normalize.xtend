@@ -15,16 +15,16 @@ import de.grammarcraft.xtend.flow.annotations.OutputPort
 )
 class Normalize {
     
+    val toLower = new ToLower
+    val toUpper = new ToUpper
+    
     new() {
         bind();
     }
     
-    val toLower = new ToLower
-    val toUpper = new ToUpper
-    
     private def bind() { // warning comes from an error in Xtend
-        toLower -> [msg | lower.forward(msg)]
-        toUpper -> [msg | upper.forward(msg)]
+        toLower.output -> [msg | lower.forward(msg)]
+        toUpper.output -> [msg | upper.forward(msg)]
     }
     
     override processInput(String msg) {
