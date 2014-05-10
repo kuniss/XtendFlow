@@ -23,6 +23,8 @@ class Normalize {
     }
     
     private def bind() { // warning comes from an error in Xtend
+        // the error will be solved with Xtend release subsequent to 2.5.4
+        // see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=430489 
         toLower.output -> [msg | lower.forward(msg)]
         toUpper.output -> [msg | upper.forward(msg)]
     }
