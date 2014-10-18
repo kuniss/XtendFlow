@@ -17,6 +17,10 @@ import de.grammarcraft.xtend.flow.annotations.OutputPort
     ]
 )
 class Collector {
+
+    new() {
+        this.separator = ", ";
+    }
     
     new(String separator) {
         this.separator = separator;
