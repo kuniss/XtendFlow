@@ -163,12 +163,13 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     
     private static def extendConstructor(MutableClassDeclaration annotatedClass) {
         val hasConstructorsDeclared = !annotatedClass.declaredConstructors.empty
+        val overridesBindMethod = annotatedClass.declaredMethods.exists[simpleName == 'bind']
         if (hasConstructorsDeclared) {
             annotatedClass.declaredConstructors.forEach[
                 val oldBody = body
                 body = ['''
                     super("«annotatedClass.simpleName»");
-                    
+                    «IF overridesBindMethod»bind();«ENDIF»
                     // currently there is no way in xtend to insert generated java code (generated from xtend constructor code)
                     // therefore the following is xtend code and must be like native Java code (e.g. having semicolons) to avoid java compiler errors
                     «oldBody»
@@ -177,7 +178,10 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         }
         else {
             annotatedClass.addConstructor[
-                body = ['''super("«annotatedClass.simpleName»");''']
+                body = ['''
+                    super("«annotatedClass.simpleName»");
+                    «IF overridesBindMethod»bind();«ENDIF»
+                ''']
             ]
         }
     }
