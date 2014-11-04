@@ -38,6 +38,13 @@ annotation OutputPort {
     Class<?>[] typeArguments = #[]
 }
 
+/**
+ * Annotation to mark the method where a integrating function unit is wiring the integrated function ports
+ * to its output ports. This method is called implicitly at function unit's constructor.<br>
+ * There must be only one wiring method.
+ */
+annotation Wiring {}
+
 class FunctionUnitProcessor extends AbstractClassProcessor {
     
     Iterable<? extends AnnotationReference> inputPortAnnotations
@@ -113,7 +120,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         annotatedClass.extendedClass = FunctionUnitBase.newTypeReference
         annotatedClass.final = true
                     
-        extendConstructor(annotatedClass)
+        extendConstructor(annotatedClass, context)
 
         addInputPorts(annotatedClass, context) 
         
@@ -161,15 +168,20 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             annotatedClass.addWarning("no output port defined")
     }
     
-    private static def extendConstructor(MutableClassDeclaration annotatedClass) {
+    private static def extendConstructor(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        val wiringMethods = annotatedClass.declaredMethods.filter[annotations.exists[annotationTypeDeclaration.simpleName == Wiring.simpleName]]
+        if (wiringMethods.size > 1)  
+            wiringMethods.forEach[addWarning("only one method may be marked with @Wiring annotation")]
+        val wiringMethod = wiringMethods.head
+        wiringMethod?.markAsRead
+
         val hasConstructorsDeclared = !annotatedClass.declaredConstructors.empty
-        val overridesBindMethod = annotatedClass.declaredMethods.exists[simpleName == 'bind']
         if (hasConstructorsDeclared) {
             annotatedClass.declaredConstructors.forEach[
                 val oldBody = body
                 body = ['''
                     super("«annotatedClass.simpleName»");
-                    «IF overridesBindMethod»bind();«ENDIF»
+                    «IF wiringMethod != null»«wiringMethod.simpleName»();«ENDIF»
                     // currently there is no way in xtend to insert generated java code (generated from xtend constructor code)
                     // therefore the following is xtend code and must be like native Java code (e.g. having semicolons) to avoid java compiler errors
                     «oldBody»
@@ -180,7 +192,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             annotatedClass.addConstructor[
                 body = ['''
                     super("«annotatedClass.simpleName»");
-                    «IF overridesBindMethod»bind();«ENDIF»
+                    «IF wiringMethod != null»«wiringMethod.simpleName»();«ENDIF»
                 ''']
             ]
         }

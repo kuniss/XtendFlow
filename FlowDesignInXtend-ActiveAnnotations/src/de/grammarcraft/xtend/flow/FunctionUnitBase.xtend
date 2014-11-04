@@ -45,10 +45,4 @@ class FunctionUnitBase {
         return [];
     }
     
-    /**
-     * This method is a place holder for function units which integrates other function units, a so
-     * called "board". The method must be overridden at integrating function units wiring up the 
-     * ports of integrated function units to output ports of the integrating function unit.
-     */
-    protected def void bind() {}
 }
