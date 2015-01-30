@@ -1,0 +1,37 @@
+plugins {
+	id 'java'
+	id 'org.xtend.xtend' version '0.3.6'
+	id 'com.github.oehme.sobula.bintray-release' version '0.4.1'
+}
+
+group = "de.grammarcraft"
+description = "Flow Design Library Implementation for Xtend"
+ 
+contacts {
+	"kuniss@grammarcraft.de" {
+		moniker "Denis Kuniss"
+		roles "owner"
+		github "kuniss"
+	}
+}
+
+bintray.user = "kuniss"
+bintray.pkg.version.gpg.sign = false // do not sign initially
+bintray.pkg.version.mavenCentralSync.sync = false // do not sync to maven initially
+
+repositories.jcenter()
+
+dependencies {
+  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
+  testCompile 'junit:junit:4.+'
+  testCompile 'org.eclipse.xtend:org.eclipse.xtend.core:2.7.+'
+}
+
+sourceSets {
+	main.java.srcDir 'src'
+	test.java.srcDir 'test/src'
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.2'
+}
