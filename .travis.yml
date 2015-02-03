@@ -2,6 +2,6 @@ language: java
 sudo: false
 cache:
   directories:
-  - $HOME/FlowDesignInXtend-ActiveAnnotations/.gradle
+  - $HOME/.gradle
 script: cd FlowDesignInXtend-ActiveAnnotations && ./gradlew check && ./.travis/releaseOnTag.sh
 
