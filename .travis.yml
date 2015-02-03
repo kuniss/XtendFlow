@@ -1,0 +1,7 @@
+language: java
+sudo: false
+cache:
+  directories:
+  - $HOME/FlowDesignInXtend-ActiveAnnotations/.gradle
+script: ./FlowDesignInXtend-ActiveAnnotations/gradlew check && ./.travis/releaseOnTag.sh
+
