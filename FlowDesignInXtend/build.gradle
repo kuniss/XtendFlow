@@ -3,16 +3,11 @@ plugins {
 	id 'org.xtend.xtend' version '0.3.6'
 }
 
-repositories {
-	jcenter()
-	maven {
-        url "http://dl.bintray.com/kuniss/maven" // currently this is needed due to an issue in jcenter
-	}
-}
+repositories.jcenter()
 
 dependencies {
   compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
-  compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.0.7'
+  compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.0.8'
 }
 
 sourceSets {
