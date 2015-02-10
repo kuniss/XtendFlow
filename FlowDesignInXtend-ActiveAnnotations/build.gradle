@@ -16,7 +16,7 @@ contacts {
 }
 
 bintray.user = "kuniss"
-bintray.pkg.version.mavenCentralSync.sync = false // do not sync to maven initially
+bintray.pkg.version.mavenCentralSync.user = "kuniss"
 
 repositories.jcenter()
 

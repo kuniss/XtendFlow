@@ -8,5 +8,5 @@ Last Release: [![Download](https://api.bintray.com/packages/kuniss/maven/de.gram
 
 This library implementation provides Flow Design based programming for [Xtend](https://www.eclipse.org/xtend/). 
 
-For details see [my blog article](http://blog.grammarcraft.de/2014/06/05/extend-your-flow-horizon-flow-design-mit-xtend/)
+See [my blog article](http://blog.grammarcraft.de/2014/06/05/extend-your-flow-horizon-flow-design-mit-xtend/)
 for details (in German).
