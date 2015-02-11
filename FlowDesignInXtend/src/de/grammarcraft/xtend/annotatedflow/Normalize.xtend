@@ -3,7 +3,6 @@ package de.grammarcraft.xtend.annotatedflow
 import de.grammarcraft.xtend.flow.annotations.FunctionUnit
 import de.grammarcraft.xtend.flow.annotations.InputPort
 import de.grammarcraft.xtend.flow.annotations.OutputPort
-import de.grammarcraft.xtend.flow.annotations.Wiring
 
 @FunctionUnit(
     inputPorts = #[
@@ -19,8 +18,7 @@ class Normalize {
     val toLower = new ToLower
     val toUpper = new ToUpper
     
-    @Wiring
-    private def void wiring() { 
+    new() { 
         toLower.output -> [msg | lower.forward(msg)]
         toUpper.output -> [msg | upper.forward(msg)]
     }
