@@ -19,8 +19,8 @@ class Normalize {
     val toUpper = new ToUpper
     
     new() { 
-        toLower.output -> [msg | lower.forward(msg)]
-        toUpper.output -> [msg | upper.forward(msg)]
+        toLower.output -> lower
+        toUpper.output -> upper
     }
 
     override processInput(String msg) {

@@ -50,5 +50,11 @@ class OutputPort<MessageType> {
         outputOperations.add(fu.theOneAndOnlyInputPort)
     }
     
+    // convenience operator for connecting from output port to output port when wiring in 
+    // integration function units, see Normalize.xtend for example
+    // defines operator "->", used as connector between an output port of an integrated function unit and an own output port
+    def void operator_mappedTo(OutputPort<MessageType> outputPort) {
+        outputOperations.add([msg|outputPort.forward(msg)])
+    }
     
 }
