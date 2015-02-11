@@ -38,13 +38,6 @@ annotation OutputPort {
     Class<?>[] typeArguments = #[]
 }
 
-/**
- * Annotation to mark the method where a integrating function unit is wiring the integrated function ports
- * to its output ports. This method is called implicitly at function unit's constructor.<br>
- * There must be only one wiring method.
- */
-annotation Wiring {}
-
 class FunctionUnitProcessor extends AbstractClassProcessor {
     
     Iterable<? extends AnnotationReference> inputPortAnnotations
@@ -119,9 +112,9 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         // add extends clause 
         annotatedClass.extendedClass = FunctionUnitBase.newTypeReference
         annotatedClass.final = true
+        
+        addNamingStuff(annotatedClass, context)
                     
-        extendConstructor(annotatedClass, context)
-
         addInputPorts(annotatedClass, context) 
         
         addOutputPorts(annotatedClass, context)
@@ -168,34 +161,27 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             annotatedClass.addWarning("no output port defined")
     }
     
-    private static def extendConstructor(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-        val wiringMethods = annotatedClass.declaredMethods.filter[annotations.exists[annotationTypeDeclaration.simpleName == Wiring.simpleName]]
-        if (wiringMethods.size > 1)  
-            wiringMethods.forEach[addWarning("only one method may be marked with @Wiring annotation")]
-        val wiringMethod = wiringMethods.head
-        wiringMethod?.markAsRead
-
-        val hasConstructorsDeclared = !annotatedClass.declaredConstructors.empty
-        if (hasConstructorsDeclared) {
-            annotatedClass.declaredConstructors.forEach[
-                val oldBody = body
-                body = ['''
-                    super("«annotatedClass.simpleName»");
-                    «IF wiringMethod != null»«wiringMethod.simpleName»();«ENDIF»
-                    // currently there is no way in xtend to insert generated java code (generated from xtend constructor code)
-                    // therefore the following is xtend code and must be like native Java code (e.g. having semicolons) to avoid java compiler errors
-                    «oldBody»
-                ''']
-            ]            
-        }
-        else {
-            annotatedClass.addConstructor[
-                body = ['''
-                    super("«annotatedClass.simpleName»");
-                    «IF wiringMethod != null»«wiringMethod.simpleName»();«ENDIF»
-                ''']
-            ]
-        }
+    /**
+     * Adds function unit's naming field and overwriting of toString method, like
+     * <pre>
+     * private final static String _name = "MyFunctionUnit";
+     * public final String toString() { return this._name; }
+     * </pre>
+     */
+    private static def void addNamingStuff(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        annotatedClass.addField('_name', [
+            final = true
+            static = true
+            visibility = Visibility::PRIVATE
+            type = String.newTypeReference
+            initializer = ['''"«annotatedClass.simpleName»"''']
+       ])
+       annotatedClass.addMethod('toString', [
+           final = true
+           visibility = Visibility::PUBLIC
+           returnType = String.newTypeReference
+           body = ['''return this._name;''']
+       ])
     }
     
     private def addInputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {

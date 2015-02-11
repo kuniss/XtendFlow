@@ -8,15 +8,7 @@
 
 package de.grammarcraft.xtend.flow
 
-class FunctionUnitBase {
-    
-    val String name
-    
-    new(String name) {
-        this.name = name
-    }
-    
-    override toString() { this.name }
+abstract class FunctionUnitBase {
     
     public val integrationError = new OutputPort<Exception>('integrationError',
         [
