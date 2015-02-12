@@ -7,7 +7,7 @@ repositories.jcenter()
 
 dependencies {
   compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
-  compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.0.8'
+  compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.1.+'
 }
 
 sourceSets {
