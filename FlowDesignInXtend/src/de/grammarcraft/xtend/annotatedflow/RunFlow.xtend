@@ -32,11 +32,11 @@ class RunFlow {
 	  println("run them...")
 	  val palindrom = "Trug Tim eine so helle Hose nie mit Gurt?"
 	  println("send message: " + palindrom)
-	  reverse.input(palindrom)
+	  reverse <= palindrom
 	  
-      reverse.input(palindrom) // second call should raise an error message on the Collectors error port
+      reverse <= palindrom // second call should raise an error message on the Collectors error port
 
-      notConnectedFunctionUnit.input(palindrom) // should raise an integration error as function unit is not connected to any one
+      notConnectedFunctionUnit <= palindrom // should raise an integration error as function unit is not connected to any one
 
 	  println("finished.")
 	  

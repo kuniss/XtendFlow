@@ -39,21 +39,44 @@ class OutputPort<MessageType> {
         }
     }
     
+    /**
+     * Convenience operator for forwarding a message value to the output port.<br>
+     * Defines operator "&lt;=", used to forward a message value.<br>
+     * Example:<pre> 
+     *   output <= "some string"
+     * </pre>
+     */
+    def void <= (MessageType msg) {
+        forward(msg)
+    }
+    
+
+    /**
+     * Convenience operator for forwarding a message value to the output port.<br>
+     * Defines operator "&lt;=", used to forward a message value computed from the passed closure.<br>
+     * Example:<pre> 
+     *   output &lt;= [ if (state &gt; 0) "some string" else "some other string" ]
+     * </pre>
+     */
+    def void <= (()=>MessageType msgClosure) {
+        forward(msgClosure.apply)
+    }
+    
     // defines operator "->", used as function unit connector
-    def void operator_mappedTo((MessageType)=>void operation) {
+    def void ->((MessageType)=>void operation) {
         outputOperations.add(operation)
     }
     
     // convenient operator for connecting to function units defining one and only one input port:
     // defines operator "->", used as function unit connector
-    def void operator_mappedTo(FunctionUnitBase fu) {
+    def void ->(FunctionUnitBase fu) {
         outputOperations.add(fu.theOneAndOnlyInputPort)
     }
     
     // convenience operator for connecting from output port to output port when wiring in 
     // integration function units, see Normalize.xtend for example
     // defines operator "->", used as connector between an output port of an integrated function unit and an own output port
-    def void operator_mappedTo(OutputPort<MessageType> outputPort) {
+    def void ->(OutputPort<MessageType> outputPort) {
         outputOperations.add([msg|outputPort.forward(msg)])
     }
     

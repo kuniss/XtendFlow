@@ -24,8 +24,13 @@ class Normalize {
     }
 
     override processInput(String msg) {
-        toLower.input(msg)
-        toUpper.input(msg)
+        toLower <= msg // input value forwarding
+        toUpper <= [ // input value forwarding by result of a closure
+            if (msg.length > 3) // meaningless! only to show arbitrary code may be specified here
+                msg
+            else 
+                msg
+        ]
     }
     
 }

@@ -40,11 +40,13 @@ class Collector {
     // This method implements the semantic of the function unit      
     private def accumulateInput(String msg) {
         if (accumulation.length >= 2) 
-            error.forward(this + ' got more than two input messages; not allowed')
+            error <= this + ' got more than two input messages; not allowed'
         accumulation.add(msg)
-        if (accumulation.length == 2) output.forward(accumulation.join(separator))
+        if (accumulation.length == 2) 
+            output <= [
+                accumulation.join(separator)
+            ]
     }
-    
     
     
 }

@@ -16,7 +16,7 @@ import de.grammarcraft.xtend.flow.annotations.OutputPort
 class ComplextypedFU {
     
     override processInput(List<String> msg) {
-        output.forward(msg)
+        output <= msg
     }
     
 }
