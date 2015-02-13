@@ -16,7 +16,7 @@ class ToLower {
     
     // This method implements the semantic of the function unit
     override processInput(String msg) {
-        output.forward(msg.toLowerCase);
+        output <= msg.toLowerCase;
     }
     
     /**

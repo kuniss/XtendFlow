@@ -15,7 +15,7 @@ import de.grammarcraft.xtend.flow.annotations.OutputPort
 class ToUpper {
 
     override processInput(String msg) {
-        output.forward(msg.toUpperCase);
+        output <= msg.toUpperCase;
     }
 
     /**
