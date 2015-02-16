@@ -1,7 +1,5 @@
 package de.grammarcraft.xtend.firstflow
 
-import de.grammarcraft.xtend.flow.InputPort
-
 package class Reverse extends FunctionUnit {
     
     new() { super("Reverse") }
