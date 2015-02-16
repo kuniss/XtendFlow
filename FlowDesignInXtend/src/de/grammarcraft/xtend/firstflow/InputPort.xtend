@@ -21,7 +21,7 @@ class InputPort<MessageType> {
     /**
      * Creates a named input port with the given port name without predefined input processing closure.<br>
      * This is intended to be used inside integration function units where the input processing closure is defined at the constructor by
-     * and wiring operation.
+     * an dedicated wiring operation.
      * @param name the name of the port
      * @param intergationErrorOperation the closure to be executed if the input processing closure is not defined
      */
