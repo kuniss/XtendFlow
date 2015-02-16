@@ -11,10 +11,10 @@ package class Collector extends FunctionUnit {
     }
     
     // input1 port
-    public val input1 = new InputPort<String>('''«this».input1''', [accumulateInput])
+    public val input1 = new InputPort<String>('''«this».input1''', [accumulateInput], [forwardIntegrationError])
 
     // input2 port
-    public val input2 = new InputPort<String>('''«this».input2''', [accumulateInput])
+    public val input2 = new InputPort<String>('''«this».input2''', [accumulateInput], [forwardIntegrationError])
     
     
     // output port    

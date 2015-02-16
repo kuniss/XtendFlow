@@ -5,7 +5,7 @@ package class ToUpper extends FunctionUnit implements FunctionUnitWithOnlyOneInp
     new() { super('ToUpper') }
     
     // input port
-    InputPort<String> input = new InputPort('''«this».input''', [processInput])
+    public val input = new InputPort<String>('''«this».input''', [processInput], [forwardIntegrationError])
     
     // output port    
     public val output = new OutputPort<String>('''«this».output''', [forwardIntegrationError])

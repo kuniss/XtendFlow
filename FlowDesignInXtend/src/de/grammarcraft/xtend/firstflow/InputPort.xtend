@@ -2,15 +2,45 @@ package de.grammarcraft.xtend.firstflow
 
 class InputPort<MessageType> {
 
-    String name
+    val String name
     (MessageType)=>void processInputOperation
-    
-    new(String name, (MessageType)=>void processInputOperation) {
+    val (Exception)=>void integrationErrorOperation
+
+    /**
+     * Creates a named input port with the given port name.
+     * @param name the name of the port
+     * @param processInputOperation the closure to be applied to an input message received over this port
+     * @param intergationErrorOperation the closure to be executed if the input processing closure given before is null
+     */
+    new(String name, (MessageType)=>void processInputOperation, (Exception)=>void integrationErrorOperation) {
         this.name = name
         this.processInputOperation = processInputOperation
+        this.integrationErrorOperation = integrationErrorOperation
+    }
+    
+    /**
+     * Creates a named input port with the given port name without predefined input processing closure.<br>
+     * This is intended to be used inside integration function units where the input processing closure is defined at the constructor by
+     * and wiring operation.
+     * @param name the name of the port
+     * @param intergationErrorOperation the closure to be executed if the input processing closure is not defined
+     */
+    new(String name, (Exception)=>void errorOperation) {
+        this(name, null, errorOperation)    
     }
     
     override toString() { this.name }
+    
+    private def processInput(MessageType msg) {
+        if (processInputOperation == null) {
+            integrationErrorOperation.apply(
+                new RuntimeException(
+                    '''no valid binding defined for '«this»' - message '«msg»' could not be processed.'''))
+        }
+        else {
+            processInputOperation.apply(msg)
+        }
+    }
     
     /**
      * Forward operation of the flow DSL.<br>
@@ -20,7 +50,7 @@ class InputPort<MessageType> {
      * input port belongs to.
      */
     def void <= (MessageType msg) {
-        processInputOperation.apply(msg)
+        processInput(msg)
     }
     
     /**
@@ -31,7 +61,7 @@ class InputPort<MessageType> {
      * input port belongs to.
      */
     def void <= (()=>MessageType msgClosure) {
-        processInputOperation.apply(msgClosure.apply)
+        processInput(msgClosure.apply)
     }
     
     package def (MessageType)=>void inputProcessingOperation() {

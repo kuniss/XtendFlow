@@ -5,7 +5,7 @@ package class Reverse extends FunctionUnit {
     new() { super("Reverse") }
     
     // input port
-    public val input = new InputPort<String>('''«this».input''', [processInput])
+    public val input = new InputPort<String>('''«this».input''', [processInput], [forwardIntegrationError])
     
     // output port    
     public val output = new OutputPort<String>('''«this».output''', [forwardIntegrationError])

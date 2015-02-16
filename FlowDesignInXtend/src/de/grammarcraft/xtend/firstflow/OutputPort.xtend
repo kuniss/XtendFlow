@@ -5,12 +5,12 @@ import java.util.List
 
 package class OutputPort<MessageType> {
     
-    String name
-    (Exception)=>void errorOperation
+    val String name
+    val (Exception)=>void integrationErrorOperation
     
-    new(String name, (Exception)=>void errorOperation) {
+    new(String name, (Exception)=>void integrationErrorOperation) {
         this.name = name
-        this.errorOperation = errorOperation
+        this.integrationErrorOperation = integrationErrorOperation
     }
 
     override toString() { this.name }
@@ -24,7 +24,7 @@ package class OutputPort<MessageType> {
             ]
         }
         else {
-            errorOperation.apply(
+            integrationErrorOperation.apply(
                 new RuntimeException(
                     '''no binding defined for '«this»' - message '«msg»' could not be delivered.'''))
         }
