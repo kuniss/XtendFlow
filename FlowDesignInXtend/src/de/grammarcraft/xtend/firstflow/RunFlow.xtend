@@ -30,7 +30,7 @@ package class RunFlow {
 	  println("run them...")
 	  val palindrom = "Trug Tim eine so helle Hose nie mit Gurt?"
 	  println("send message: " + palindrom)
-	  reverse.input(palindrom)
+	  reverse.input <= palindrom
 
 	  println("finished.")
 	  

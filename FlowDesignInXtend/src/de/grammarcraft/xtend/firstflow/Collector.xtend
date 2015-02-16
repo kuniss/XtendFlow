@@ -11,21 +11,18 @@ package class Collector extends FunctionUnit {
     }
     
     // input1 port
-    public val (String)=>void input1 = [msg | input1(msg)]
-    def input1(String msg) { accumulateInput(msg) }
+    public val input1 = new InputPort<String>('''«this».input1''', [accumulateInput])
 
     // input2 port
-    public val (String)=>void input2 = [msg | input2(msg)]
-    def input2(String msg) { accumulateInput(msg) }
+    public val input2 = new InputPort<String>('''«this».input2''', [accumulateInput])
+    
     
     // output port    
-    public val output = new OutputPort<String>('''«this».output''', 
-        [forwardIntegrationError]
-    )
+    public val output = new OutputPort<String>('''«this».output''', [forwardIntegrationError])
     
     // convenient operator for function units defining one and only one output port:
     // defines operator "->", used as function unit connector
-    def void operator_mappedTo((String)=>void operation) {
+    def void ->((String)=>void operation) {
         output -> operation
     }
     
@@ -36,7 +33,8 @@ package class Collector extends FunctionUnit {
     // This method implements the semantic of the function unit      
     private def accumulateInput(String msg) {
         accumulation.add(msg)
-        if (accumulation.length == 2) output.forward(accumulation.join(separator))
+        if (accumulation.length == 2) 
+            output <= accumulation.join(separator)
     }
         
 }
