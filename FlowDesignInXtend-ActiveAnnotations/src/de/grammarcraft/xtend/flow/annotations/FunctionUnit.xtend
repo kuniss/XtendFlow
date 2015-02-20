@@ -9,6 +9,9 @@
 package de.grammarcraft.xtend.flow.annotations
 
 import de.grammarcraft.xtend.flow.FunctionUnitBase
+import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort
+import java.util.ArrayList
+import java.util.List
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.RegisterGlobalsContext
@@ -18,7 +21,6 @@ import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort
 
 @Active(FunctionUnitProcessor)
 annotation FunctionUnit {
@@ -114,15 +116,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         annotatedClass.extendedClass = FunctionUnitBase.newTypeReference
         annotatedClass.final = true
         
-        // add implements FunctionUnitWithOnlyOneInputPort<?> if only one input port defined
-        if (inputPortAnnotations.size == 1) {
-            val inputPortAnnotation = inputPortAnnotations.head
-            annotatedClass.implementedInterfaces = #[
-                de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort.newTypeReference(
-                    inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
-                )
-            ]
-        }
+        addInterfaces(annotatedClass, context)
         
         addNamingStuff(annotatedClass, context)
                     
@@ -131,6 +125,44 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         addOutputPorts(annotatedClass, context)
     }
     
+    /**
+     * Adds "implements FunctionUnitWithOnlyOneInputPort<?>" if only one input port defined.
+     * Add "implements FunctionUnitWithOnlyOneOutputPort<?>" if only one output port defined
+     */
+    def addInterfaces(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        if (inputPortAnnotations.size == 1 || outputPortAnnotations.size == 1) 
+        {
+            val List<TypeReference> interfacesToBeAdded = new ArrayList
+        
+            if (inputPortAnnotations.size == 1) {
+                val inputPortAnnotation = inputPortAnnotations.head
+                interfacesToBeAdded.add( 
+                    de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort.newTypeReference(
+                        inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
+                    )
+                )
+            }
+            
+            if (outputPortAnnotations.size == 1) {
+                val outputPortAnnotation = outputPortAnnotations.head
+                interfacesToBeAdded.add( 
+                    de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneOutputPort.newTypeReference(
+                        outputPortAnnotation.portType.type.newTypeReference(outputPortAnnotation.portTypeParameters)
+                    )
+                )
+            }
+            annotatedClass.implementedInterfaces = interfacesToBeAdded
+        }
+    }
+    
+    
+    private def checkForContextWarnings(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
+        if (inputPortAnnotations.empty)
+            annotatedClass.addWarning("no input port defined")
+        
+        if (outputPortAnnotations.empty)
+            annotatedClass.addWarning("no output port defined")
+    }
     
     private def checkForContextErrors(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
         var boolean contextError = false
@@ -164,14 +196,6 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         return contextError
     }
 
-    private def checkForContextWarnings(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
-        if (inputPortAnnotations.empty)
-            annotatedClass.addWarning("no input port defined")
-        
-        if (outputPortAnnotations.empty)
-            annotatedClass.addWarning("no output port defined")
-    }
-    
     /**
      * Adds function unit's naming field and overwriting of toString method, like
      * <pre>
