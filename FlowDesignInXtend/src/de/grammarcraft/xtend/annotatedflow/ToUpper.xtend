@@ -28,7 +28,7 @@ class ToUpper {
      * Here added only for exploring Xtend's embedded DSL design capabilities
      */
     def void <= (()=>String msgClosure) {
-        input(msgClosure.apply)
+        input <= msgClosure.apply
     }
     
 }

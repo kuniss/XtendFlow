@@ -37,7 +37,7 @@ class Reverse {
      * Here added only for exploring Xtend's embedded DSL design capabilities
      */
     def void <= (String msg) {
-        input(msg)
+        input <= msg
     }
     
 }

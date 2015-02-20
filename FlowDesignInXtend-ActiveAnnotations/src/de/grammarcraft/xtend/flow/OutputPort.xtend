@@ -13,71 +13,97 @@ import java.util.List
 
 class OutputPort<MessageType> {
     
-    String name
-    (Exception)=>void errorOperation
+    val String name
+    val (Exception)=>void integrationErrorOperation
     
-    new(String name, (Exception)=>void errorOperation) {
+    /**
+     * Creates a named output port with the given port name.
+     * @param name the name of the port
+     * @param intergationErrorOperation the closure to be executed if no foreign input port at all has been bound to this output port
+     */
+    new(String name, (Exception)=>void integrationErrorOperation) {
         this.name = name
-        this.errorOperation = errorOperation
+        this.integrationErrorOperation = integrationErrorOperation
     }
 
     override toString() { this.name }
 
     private val List<(MessageType)=>void> outputOperations = new ArrayList
     
-    
-    def forward(MessageType msg) {
+    private def forward(MessageType msg) {
         if (!outputOperations.empty) {
             outputOperations.forEach[
                 operation | operation.apply(msg)
             ]
         }
         else {
-            errorOperation.apply(
+            integrationErrorOperation.apply(
                 new RuntimeException(
                     '''no binding defined for '«this»' - message '«msg»' could not be delivered.'''))
         }
     }
     
     /**
-     * Convenience operator for forwarding a message value to the output port.<br>
-     * Defines operator "&lt;=", used to forward a message value.<br>
-     * Example:<pre> 
-     *   output <= "some string"
-     * </pre>
+     * Wiring operation of the flow DSL.<br>
+     * Connects function unit own output port <i>fu.output</i> to an 
+     * anonymous closure (which may have side effects).<br>
+     * E.g.: fu.output -> [closure]
      */
-    def void <= (MessageType msg) {
-        forward(msg)
+    def void -> ((MessageType)=>void operation) {
+        outputOperations.add(operation)
     }
-    
 
     /**
-     * Convenience operator for forwarding a message value to the output port.<br>
-     * Defines operator "&lt;=", used to forward a message value computed from the passed closure.<br>
-     * Example:<pre> 
-     *   output &lt;= [ if (state &gt; 0) "some string" else "some other string" ]
-     * </pre>
+     * Wiring operation of the flow DSL.<br>
+     * Connects function unit own output port <i>fu.output</i> to an 
+     * foreign function unit with one and only one input port.<br>
+     * E.g.: fu.output -> fu'
+     */
+    def void -> (FunctionUnitWithOnlyOneInputPort<MessageType> foreignFu) {
+        outputOperations.add(foreignFu.theOneAndOnlyInputPort.inputProcessingOperation)
+    }
+    
+    /**
+     * Wiring operation of the flow DSL.<br>
+     * Connects function unit own output port <i>fu.output</i> to a 
+     * named input port of a foreign function unit.<br>
+     * E.g.: fu.output -> fu'.input
+     */
+    def void -> (InputPort<MessageType> foreignInputPort) {
+        outputOperations.add(foreignInputPort.inputProcessingOperation)
+    }
+
+    /**
+     * Wiring operation of the flow DSL.<br>
+     * Connects function unit own output port <i>fu.output</i> to an 
+     * anonymous closure (which may have side effects).<br>
+     * E.g.: fu.output -> fu'
+     */
+    def void -> (OutputPort<MessageType> ownOutputPort) {
+        outputOperations.add([msg|ownOutputPort.forward(msg)])
+    }
+    
+    
+    /**
+     * Forward operation of the flow DSL.<br>
+     * Forwards a message value to an function unit own output port <i>fu.output</i>.<br>
+     * E.g.: .output <= output value<br>
+     * This is typically used inside the implementation of function unit to forward 
+     * results of the function unit's computation to outside over outut ports.
+     */
+    def void <= (MessageType msg) {
+        forward(msg);
+    }
+    
+    /**
+     * Forward operation of the flow DSL.<br>
+     * Forwards a message value to an function unit own output port <i>fu.output</i>.<br>
+     * E.g.: .output <= [closure computing output value]<br>
+     * This is typically used inside the implementation of function unit to forward 
+     * results of the function unit's computation to outside over outut ports.
      */
     def void <= (()=>MessageType msgClosure) {
         forward(msgClosure.apply)
-    }
-    
-    // defines operator "->", used as function unit connector
-    def void ->((MessageType)=>void operation) {
-        outputOperations.add(operation)
-    }
-    
-    // convenient operator for connecting to function units defining one and only one input port:
-    // defines operator "->", used as function unit connector
-    def void ->(FunctionUnitBase fu) {
-        outputOperations.add(fu.theOneAndOnlyInputPort)
-    }
-    
-    // convenience operator for connecting from output port to output port when wiring in 
-    // integration function units, see Normalize.xtend for example
-    // defines operator "->", used as connector between an output port of an integrated function unit and an own output port
-    def void ->(OutputPort<MessageType> outputPort) {
-        outputOperations.add([msg|outputPort.forward(msg)])
     }
     
 }

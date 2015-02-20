@@ -18,6 +18,7 @@ import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort
 
 @Active(FunctionUnitProcessor)
 annotation FunctionUnit {
@@ -113,6 +114,16 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         annotatedClass.extendedClass = FunctionUnitBase.newTypeReference
         annotatedClass.final = true
         
+        // add implements FunctionUnitWithOnlyOneInputPort<?> if only one input port defined
+        if (inputPortAnnotations.size == 1) {
+            val inputPortAnnotation = inputPortAnnotations.head
+            annotatedClass.implementedInterfaces = #[
+                de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort.newTypeReference(
+                    inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
+                )
+            ]
+        }
+        
         addNamingStuff(annotatedClass, context)
                     
         addInputPorts(annotatedClass, context) 
@@ -190,31 +201,33 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             val portName = inputPortAnnotation.portName
             val inputPortInterfaceName = getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
             val msgType = inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
+            val processInputMethodName = '''process«portName.toFirstUpper»'''
             
             annotatedClass.addField(portName, [
                 final = true
                 visibility = Visibility::PUBLIC
-                type = Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
+                type = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType) // msgType.newWildcardTypeReferenceWithLowerBound?
                 initializer = ['''
-                    new org.eclipse.xtext.xbase.lib.Functions.Function0<org.eclipse.xtext.xbase.lib.Procedures.Procedure1<? super «msgType»>>() {
-                        public org.eclipse.xtext.xbase.lib.Procedures.Procedure1<? super «msgType»> apply() {
+                    new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.InputPort<«msgType»>>() {
+                        public de.grammarcraft.xtend.flow.InputPort<«msgType»> apply() {
+                          org.eclipse.xtend2.lib.StringConcatenation _builder = new org.eclipse.xtend2.lib.StringConcatenation();
+                          _builder.append(«annotatedClass.simpleName».this, "");
+                          _builder.append(".«portName»");
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
                             public void apply(final «msgType» msg) {
-                              «annotatedClass.simpleName».this.«portName»(msg);
+                              «annotatedClass.simpleName».this.«processInputMethodName»(msg);
                             }
                           };
-                          return _function;
+                          final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception> _function_1 = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception>() {
+                            public void apply(final Exception it) {
+                              «annotatedClass.simpleName».this.forwardIntegrationError(it);
+                            }
+                          };
+                          de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function, _function_1);
+                          return _inputPort;
                         }
                     }.apply();
                 ''']
-            ])
-            
-            val processInputMethodName = '''process«portName.toFirstUpper»'''
-            val msgParameterName = 'msg'
-            annotatedClass.addMethod(portName, [
-                final = true
-                addParameter(msgParameterName, msgType)
-                body = ['''«processInputMethodName»(«msgParameterName»);''']
             ])
             
             // add the interface to the list of implemented interfaces
@@ -226,16 +239,15 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                     Implement this method to process input arriving via input port "«portName»".
                     Message coming in have type "«msgType»".
                 '''
-                addParameter(msgParameterName, msgType)
+                addParameter('msg', msgType)
             ]
             
-            // override the canonical function unit base method getTheOneAndOnlyInputPort for returning
-            // the procedure assigned to this one and only input port
+            // implements the theOneAndOnlyInputPort method from FunctionUnitWithOneAndOnlyOneInputPort interface for returning
+            // the one and only input port
             if (inputPortAnnotations.size == 1) {
-                annotatedClass.addMethod('getTheOneAndOnlyInputPort', 
+                annotatedClass.addMethod('theOneAndOnlyInputPort', 
                         [
-                            returnType = 
-                                Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
+                            returnType = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType)
                             body = ['''
                                 return this.«portName»;
                             ''']
@@ -286,8 +298,12 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 )
                 annotatedClass.addMethod('operator_mappedTo', 
                     [
-                        addParameter('fu', FunctionUnitBase.newTypeReference)
-                        body = ['''this.«portName».operator_mappedTo(fu.<«msgType»>getTheOneAndOnlyInputPort());''']
+                        addParameter('fu', FunctionUnitWithOnlyOneInputPort.newTypeReference(msgType))
+                        body = ['''
+                                de.grammarcraft.xtend.flow.InputPort<«msgType»> _theOneAndOnlyInputPort = fu.theOneAndOnlyInputPort();
+                                org.eclipse.xtext.xbase.lib.Procedures.Procedure1<? super «msgType»> _inputProcessingOperation = _theOneAndOnlyInputPort.inputProcessingOperation();
+                                this.output.operator_mappedTo(_inputProcessingOperation);
+                        ''']
                     ]
                 )                
             }
