@@ -3,7 +3,7 @@ package de.grammarcraft.xtend.flow
 interface FunctionUnitWithOnlyOneOutputPort<MessageType> {
     
     /**
-     * Flow DSL operator "-&gt;" for connecting two function unit. 
+     * Flow DSL operator "-&gt;" for connecting two function units. 
      * The left one with only one output port, right one with only one input port.<br>
      * example:<pre>
      *   fu -&gt; fu'
@@ -25,7 +25,7 @@ interface FunctionUnitWithOnlyOneOutputPort<MessageType> {
     /**
      * Flow DSL operator "-&gt;" for connecting two function units. 
      * The left one with only one output port, the right one with named output port.<br>
-     * This is normally only used in integrating function units for connecting and integrated function unit with the 
+     * This is normally only used in integrating function units for connecting an integrated function unit with 
      * an output port of the integrating function unit.
      * example:<pre>
      *   fu -&gt; .output
