@@ -21,6 +21,7 @@ import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import org.eclipse.xtext.xbase.lib.Functions.Function0
 
 @Active(FunctionUnitProcessor)
 annotation FunctionUnit {
@@ -261,25 +262,65 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             interfaceType.addMethod(processInputMethodName) [
                 docComment = '''
                     Implement this method to process input arriving via input port "«portName»".
-                    Message coming in have type "«msgType»".
+                    Message coming in has type "«msgType»".
                 '''
                 addParameter('msg', msgType)
             ]
-            
-            // implements the theOneAndOnlyInputPort method from FunctionUnitWithOneAndOnlyOneInputPort interface for returning
-            // the one and only input port
-            if (inputPortAnnotations.size == 1) {
-                annotatedClass.addMethod('theOneAndOnlyInputPort', 
-                        [
-                            returnType = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType)
-                            body = ['''
-                                return this.«portName»;
-                            ''']
-                        ]
-                )
-                
-            }
         ]
+            
+        // implements the theOneAndOnlyInputPort method from FunctionUnitWithOneAndOnlyOneInputPort interface for returning
+        // the one and only input port
+        if (inputPortAnnotations.size == 1) 
+        {
+            val portName = inputPortAnnotations.head.portName
+            val msgType = inputPortAnnotations.head.portType.type.newTypeReference(inputPortAnnotations.head.portTypeParameters)
+            annotatedClass.addMethod('theOneAndOnlyInputPort', 
+                    [
+                        returnType = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType)
+                        body = ['''
+                            return this.«portName»;
+                        ''']
+                    ]
+            )
+            
+            annotatedClass.addMethod('operator_lessEqualsThan', 
+                [
+                    final = true
+                    docComment = '''
+                        Flow DSL operator "&lt;=" for forwarding a message of type '«msgType.name»' value to 
+                        the one and only input port '«portName»' for being processed.<br>
+                        example:<pre> 
+                          input <= "some string"
+                        </pre>
+                    '''
+                    val parameterVarName = 'msg'
+                    addParameter(parameterVarName, msgType)
+                    body = ['''
+                        this.«portName».operator_lessEqualsThan(«parameterVarName»);
+                    ''']
+                ]
+            )
+
+            annotatedClass.addMethod('operator_lessEqualsThan', 
+                [
+                    final = true
+                    docComment = '''
+                        Flow DSL operator "&lt;=" for forwarding a message value of type '«msgType.name»' to 
+                        the one and only input port '«portName»' for being processed.<br>
+                        For computing the message to be forwarded the right side closure is applied.
+                        example:<pre> 
+                          input &lt;= [ if (state&gt;0) "some string" else "some other string"
+                        </pre>
+                    '''
+                    val msgClosureVarName = 'msgClosure'
+                    addParameter(msgClosureVarName, Function0.newTypeReference(newWildcardTypeReference(msgType)))
+                    body = ['''
+                        «msgType» _apply = «msgClosureVarName».apply();
+                        this.«portName».operator_lessEqualsThan(_apply);
+                    ''']
+                ]
+            )
+        }
     }
     
     private def addOutputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
@@ -310,29 +351,90 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ''']
             ])
             
-            // add output connection operators -> if it is an one output port only function unit
-            if (outputPortAnnotations.size == 1) {
-                annotatedClass.addMethod('operator_mappedTo', 
-                    [
-                        val operationType = 
-                            Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
-                        addParameter('operation', operationType)
-                        body = ['''this.«portName».operator_mappedTo(operation);''']
-                    ]
-                )
-                annotatedClass.addMethod('operator_mappedTo', 
-                    [
-                        addParameter('fu', FunctionUnitWithOnlyOneInputPort.newTypeReference(msgType))
-                        body = ['''
-                                de.grammarcraft.xtend.flow.InputPort<«msgType»> _theOneAndOnlyInputPort = fu.theOneAndOnlyInputPort();
-                                org.eclipse.xtext.xbase.lib.Procedures.Procedure1<? super «msgType»> _inputProcessingOperation = _theOneAndOnlyInputPort.inputProcessingOperation();
-                                this.output.operator_mappedTo(_inputProcessingOperation);
-                        ''']
-                    ]
-                )                
-            }
-            
         ]
+            
+        // add output connection operators -> if it is an one output port only function unit
+        if (outputPortAnnotations.size == 1) 
+        {
+            val portName = outputPortAnnotations.head.portName
+            val msgType = outputPortAnnotations.head.portType.type.newTypeReference(outputPortAnnotations.head.portTypeParameters)
+            
+            annotatedClass.addMethod('operator_mappedTo', 
+                [
+                    final = true
+                    docComment = '''
+                        Flow DSL operator "-&gt;" for letting all message issued by the one and only output port '«portName»' being 
+                        processed by the right side closure.
+                        Typically this is used to process the message for a side effect like printing on standard out. 
+                        example:<pre>
+                          fu -&gt; [msg|println("message received: " + msg")]
+                        </pre>
+                    '''
+                    val msgProessingClosureVarName = 'msgProcessingClosure'
+                    val operationType = 
+                        Procedures.Procedure1.newTypeReference(msgType.newWildcardTypeReferenceWithLowerBound)
+                    addParameter(msgProessingClosureVarName, operationType)
+                    body = ['''this.«portName».operator_mappedTo(«msgProessingClosureVarName»);''']
+                ]
+            )
+            
+            annotatedClass.addMethod('operator_mappedTo', 
+                [
+                    final = true
+                    docComment = '''
+                        Flow DSL operator "-&gt;" for connecting two function units. 
+                        Connects the left one function unit's one and only one output port '«portName»' with 
+                        the right side funtion unit which has one and only one input port.<br>
+                        example:<pre>
+                          fu -&gt; fu'
+                        </pre>
+                    '''
+                    val rightSideFunctionUnitVarName = 'rightSideFunctionUnit'
+                    addParameter(rightSideFunctionUnitVarName, FunctionUnitWithOnlyOneInputPort.newTypeReference(msgType))
+                    body = ['''
+                            de.grammarcraft.xtend.flow.InputPort<«msgType»> _theOneAndOnlyInputPort = «rightSideFunctionUnitVarName».theOneAndOnlyInputPort();
+                            org.eclipse.xtext.xbase.lib.Procedures.Procedure1<? super «msgType»> _inputProcessingOperation = _theOneAndOnlyInputPort.inputProcessingOperation();
+                            this.«portName».operator_mappedTo(_inputProcessingOperation);
+                    ''']
+                ]
+            )
+            
+            annotatedClass.addMethod('operator_mappedTo', [
+                final = true
+                docComment = '''
+                    Flow DSL operator "-&gt;" for connecting two function units. 
+                    Connects the left one function unit's one and only one output port '«portName»' with 
+                    the right side function unit's named input port.<br>
+                    example:<pre>
+                      fu -&gt; fu'.input
+                    </pre>
+                '''
+                val rightSideFunctionUnitInputPortVarName = 'rightSideFunctionUnitInputPort'
+                addParameter(rightSideFunctionUnitInputPortVarName, de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType))
+                body = ['''
+                    this.«portName».operator_mappedTo(«rightSideFunctionUnitInputPortVarName»);
+                ''']
+            ])
+
+            annotatedClass.addMethod('operator_mappedTo', [
+                final = true
+                docComment = '''
+                    Flow DSL operator "-&gt;" for connecting two function units. 
+                    Connects the left side function unit's one and only one output port '«portName»' with 
+                    the right side function unit's named output port.<br>
+                    This is normally only used in integrating function units for connecting an integrated function unit with
+                    an output port of the integrating function unit.
+                    example:<pre>
+                      fu -&gt; output
+                    </pre>
+                '''
+                val rightSideFunctionUnitOutputPortVarName = 'rightSideFunctionUnitOutputPort'
+                addParameter(rightSideFunctionUnitOutputPortVarName, de.grammarcraft.xtend.flow.OutputPort.newTypeReference(msgType))
+                body = ['''
+                    this.«portName».operator_mappedTo(«rightSideFunctionUnitOutputPortVarName»);
+                ''']
+            ])
+        }
     }    
 
 }
