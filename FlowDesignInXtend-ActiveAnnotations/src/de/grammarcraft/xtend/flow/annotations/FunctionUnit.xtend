@@ -208,18 +208,22 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
      */
     private static def void addNamingStuff(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
         annotatedClass.addField('_name', [
-            final = true
-            static = true
             visibility = Visibility::PRIVATE
             type = String.newTypeReference
             initializer = ['''"«annotatedClass.simpleName»"''']
-       ])
-       annotatedClass.addMethod('toString', [
-           final = true
-           visibility = Visibility::PUBLIC
-           returnType = String.newTypeReference
-           body = ['''return this._name;''']
-       ])
+        ])
+        annotatedClass.addMethod('toString', [
+            final = true
+            visibility = Visibility::PUBLIC
+            returnType = String.newTypeReference
+            body = ['''return this._name;''']
+        ])
+        annotatedClass.addMethod('setName', [
+            final = true
+            visibility = Visibility::PUBLIC
+            addParameter('newValue', String.newTypeReference)
+            body = ['''this._name = newValue;''']
+        ])
     }
     
     private def addInputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
