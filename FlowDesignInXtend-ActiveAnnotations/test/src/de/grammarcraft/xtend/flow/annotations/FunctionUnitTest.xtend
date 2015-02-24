@@ -8,6 +8,7 @@
 
 package de.grammarcraft.xtend.flow.annotations
 
+import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort
 import java.util.Map
 import java.util.Set
 import org.eclipse.xtend.core.compiler.batch.XtendCompilerTester
@@ -17,7 +18,6 @@ import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.junit.Test
 
 import static org.junit.Assert.*
-import de.grammarcraft.xtend.flow.FunctionUnitBase
 
 class FunctionUnitTest {
 
@@ -49,7 +49,7 @@ class FunctionUnitTest {
             class «className» {
             
                 override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
-                    «outputPortName».forward(msg.toUpperCase);
+                    «outputPortName» <= msg.toUpperCase;
                 }
                 
             }
@@ -67,8 +67,9 @@ class FunctionUnitTest {
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
-            
+
         ]
     }
     
@@ -94,7 +95,7 @@ class FunctionUnitTest {
             class «className» {
             
                 override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
-                    «outputPortName».forward(msg.toUpperCase);
+                    «outputPortName» <= msg.toUpperCase;
                 }
                 
             }
@@ -112,6 +113,7 @@ class FunctionUnitTest {
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
@@ -139,7 +141,7 @@ class FunctionUnitTest {
             class «className» {
             
                 override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
-                    «outputPortName».forward(msg);
+                    «outputPortName» <= msg;
                 }
                 
             }
@@ -157,6 +159,7 @@ class FunctionUnitTest {
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
@@ -187,11 +190,11 @@ class FunctionUnitTest {
             class «className» {
             
                 override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
-                    «outputPortName».forward(msg);
+                    «outputPortName» <= msg;
                 }
                 
                 override «inputPort2Name.processMethodName»(«inputPort2TypeName» msg) {
-                    «outputPortName».forward(«inputPort2TypeName».toString(msg));
+                    «outputPortName» <= «inputPort2TypeName».toString(msg);
                 }
             }
         '''.compile [
@@ -212,6 +215,7 @@ class FunctionUnitTest {
             
             assertTheOneAndOnlyInputPortCanonicalMethodNOTGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsNOTGenerated(className, outputPortType, clazz, ctx)
             
         ]
     }
@@ -241,8 +245,8 @@ class FunctionUnitTest {
             class «className» {
             
                 override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
-                    «outputPortName».forward(msg.toUpperCase);
-                    «output2PortName».forward(msg.toLowerCase);
+                    «outputPortName» <= msg.toUpperCase;
+                    «output2PortName» <= msg.toLowerCase;
                 }
                 
             }
@@ -263,6 +267,7 @@ class FunctionUnitTest {
             assertOutputPortGenerated(output2PortName, output2PortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorNOTGenerated(className, clazz, ctx)
             
         ]
@@ -294,7 +299,7 @@ class FunctionUnitTest {
             class «className» {
             
                 override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
-                    «outputPortName».forward(msg.keySet);
+                    «outputPortName» <= msg.keySet;
                 }
                 
             }
@@ -312,6 +317,7 @@ class FunctionUnitTest {
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
             assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
             
         ]
@@ -342,29 +348,19 @@ class FunctionUnitTest {
             )
         ]
         
-        assertTrue('''method '«inputPortName»' does not exist at «className»''', 
-            clazz.declaredMethods.exists[simpleName == inputPortName]
-        )
-        assertTrue('''field '«inputPortName»' does not exist at «className»''', 
-            clazz.declaredFields.exists[simpleName == inputPortName]
-        )
         assertTrue('''method '«inputPortName.processMethodName»' does not exist at «className»''', 
             clazz.declaredMethods.exists[simpleName == inputPortName.processMethodName]
         )
         
-        clazz.declaredMethods.filter[simpleName == inputPortName ].head => [
-            assertEquals('''method '«simpleName»' has not exactly one parameter''', 
-                1, parameters.size
-            )
-            assertEquals('''method '«simpleName»' parameter is not of type «inputPortType»''', 
-                inputPortType, parameters.head.type
-            )
-        ]
+        assertTrue('''field '«inputPortName»' does not exist''', 
+            clazz.declaredFields.exists[simpleName == inputPortName]
+        )
         clazz.declaredFields.filter[simpleName == inputPortName].head => [
-            assertEquals('''field '«simpleName»' is not of type «Procedures.Procedure1.newTypeReference(inputPortType.newWildcardTypeReferenceWithLowerBound)»''', 
-                Procedures.Procedure1.newTypeReference(inputPortType.newWildcardTypeReferenceWithLowerBound), type
+            assertEquals('''field '«simpleName»' is not of type «de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType)»''', 
+                de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType), type
             )
         ]
+        
     }
     
     private def assertOutputPortGenerated(String outputPortName, TypeReference outputPortType, String className, 
@@ -380,6 +376,24 @@ class FunctionUnitTest {
         ]
     }
 
+    private def assertLessEqualsThanOperatorsGenerated(String className, TypeReference inputPortType,
+        MutableClassDeclaration clazz, extension TransformationContext ctx)
+    {
+        assertTrue('''operator <= (operator_lessEqualsThan) does not exist at «className»''',
+            clazz.declaredMethods.exists[simpleName == 'operator_lessEqualsThan']
+        )
+        val operatorMethods = clazz.declaredMethods.filter[simpleName == 'operator_lessEqualsThan']
+        assertEquals('''there are not 2 operator <= (operator_lessEqualsThan) methods at «className»''',
+            2, operatorMethods.size
+        )
+        assertEquals('''there is no operator <= (operator_lessEqualsThan) method with parameter «inputPortType»''',
+            1, operatorMethods.filter[parameters.head.type == inputPortType].size
+        )
+        assertEquals('''there is no operator <= (operator_lessEqualsThan) method with closure parameter «Functions.Function0.newTypeReference(inputPortType.newWildcardTypeReference)»''',
+            1, operatorMethods.filter[parameters.head.type == Functions.Function0.newTypeReference(inputPortType.newWildcardTypeReference)].size
+        )
+    }
+
     private def assertMappedToOperatorGenerated(String className, TypeReference outputPortType,
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
@@ -387,21 +401,21 @@ class FunctionUnitTest {
             clazz.declaredMethods.exists[simpleName == 'operator_mappedTo']
         )
         val operatorMethods = clazz.declaredMethods.filter[simpleName == 'operator_mappedTo']
-        assertEquals('''there are not two operator -> (operator_mappedTo) methods at «className»''',
-            2, operatorMethods.size
+        assertEquals('''there are not 4 operators -> (operator_mappedTo) methods at «className»''',
+            4, operatorMethods.size
         )
-        assertEquals('''there is no operator -> (operator_mappedTo) method with parameter «FunctionUnitBase.newTypeReference»''',
-            1, operatorMethods.filter[parameters.head.type == FunctionUnitBase.newTypeReference].size
+        assertEquals('''there is no operator -> (operator_mappedTo) method with parameter «FunctionUnitWithOnlyOneInputPort.newTypeReference(outputPortType)»''',
+            1, operatorMethods.filter[parameters.head.type == FunctionUnitWithOnlyOneInputPort.newTypeReference(outputPortType)].size
         )
-        operatorMethods.filter[parameters.head.type != FunctionUnitBase.newTypeReference].head => [
-            assertEquals('''method '«simpleName»' has not exactly one parameter''', 
-                1, parameters.size
-            )
-            assertEquals('''method '«simpleName»' parameter is not of type «Procedures.Procedure1.newTypeReference»''', 
-                Procedures.Procedure1.newTypeReference(outputPortType.newWildcardTypeReferenceWithLowerBound), 
-                parameters.head.type
-            )
-        ]
+        assertEquals('''there is no operator -> (operator_mappedTo) method with parameter «de.grammarcraft.xtend.flow.InputPort.newTypeReference(outputPortType)»''',
+            1, operatorMethods.filter[parameters.head.type == de.grammarcraft.xtend.flow.InputPort.newTypeReference(outputPortType)].size
+        )
+        assertEquals('''there is no operator -> (operator_mappedTo) method with parameter «de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType)»''',
+            1, operatorMethods.filter[parameters.head.type == de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType)].size
+        )
+        assertEquals('''there is no operator -> (operator_mappedTo) method with closure parameter «Procedures.Procedure1.newTypeReference(outputPortType.newWildcardTypeReferenceWithLowerBound)»''',
+            1, operatorMethods.filter[parameters.head.type == Procedures.Procedure1.newTypeReference(outputPortType.newWildcardTypeReferenceWithLowerBound)].size
+        )
     }
 
     private def assertMappedToOperatorNOTGenerated(String className, 
@@ -412,17 +426,24 @@ class FunctionUnitTest {
         )
     }
 
+    private def assertLessEqualsThanOperatorsNOTGenerated(String className, TypeReference outputPortType,
+        MutableClassDeclaration clazz, extension TransformationContext ctx)
+    {
+        assertFalse('''operator <= (operator_lessEqualsThan) must NOT not exist at «className», but is there''',
+            clazz.declaredMethods.exists[simpleName == 'operator_lessEqualsThan']
+        )
+    }
 
-    private def assertTheOneAndOnlyInputPortCanonicalMethodGenerated(String className, TypeReference outputPortType,
+    private def assertTheOneAndOnlyInputPortCanonicalMethodGenerated(String className, TypeReference inputPortType,
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
         assertTrue('''canonical method 'theOneAndOnlyInputPort' is not overridden at «className»''',
-            clazz.declaredMethods.exists[simpleName == 'getTheOneAndOnlyInputPort']
+            clazz.declaredMethods.exists[simpleName == 'theOneAndOnlyInputPort']
         )
-        clazz.declaredMethods.filter[simpleName == 'getTheOneAndOnlyInputPort'].head => [
+        clazz.declaredMethods.filter[simpleName == 'theOneAndOnlyInputPort'].head => [
             assertTrue('''method '«simpleName»' must not have parameters''', parameters.empty)
             assertEquals('''method '«simpleName»' return type is not «Procedures.Procedure1.newTypeReference»''', 
-                Procedures.Procedure1.newTypeReference(outputPortType.newWildcardTypeReferenceWithLowerBound), 
+                de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType), 
                 returnType
             )
         ]
