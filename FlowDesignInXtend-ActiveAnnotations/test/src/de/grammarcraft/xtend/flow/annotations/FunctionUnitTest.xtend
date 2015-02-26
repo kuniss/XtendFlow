@@ -220,7 +220,7 @@ class FunctionUnitTest {
         ]
     }
     
-        @Test def void test_2_output_ports() {
+    @Test def void test_2_output_ports() {
         val className = 'MyFunctionUnit'
         val inputPortName = 'input'
         val inputPortTypeName = 'String'
@@ -273,7 +273,7 @@ class FunctionUnitTest {
         ]
     }
     
-        @Test def void test_complex_typed_ports() {
+    @Test def void test_complex_typed_ports() {
         val className = 'MyFunctionUnit'
         val inputPortName = 'input'
         val inputPortTypeName = 'Map'
