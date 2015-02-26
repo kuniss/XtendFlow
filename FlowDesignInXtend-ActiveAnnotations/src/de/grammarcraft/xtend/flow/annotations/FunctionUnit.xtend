@@ -134,6 +134,14 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         annotatedClass.extendedClass = FunctionUnitBase.newTypeReference
         annotatedClass.final = true
         
+        annotatedClass.docComment = '''
+            Implements a function unit as defined by Flow Design paradigm.<br>
+            It consumes input messages over the input ports<br>
+                «inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
+            And issues computation results over the output ports<br>
+                «outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
+        '''
+        
         addInterfaces(annotatedClass, context)
         
         addNamingStuff(annotatedClass, context)
