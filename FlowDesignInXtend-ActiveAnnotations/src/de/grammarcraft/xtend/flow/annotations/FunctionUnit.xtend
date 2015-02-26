@@ -30,6 +30,13 @@ annotation FunctionUnit {
     OutputPort[] outputPorts = #[]
 }
 
+@Active(FunctionUnitProcessor)
+annotation FunctionBoard {
+    // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
+    InputPort[] inputPorts = #[]
+    OutputPort[] outputPorts = #[]
+}
+
 annotation InputPort {
     String name
     Class<?> type
@@ -44,6 +51,8 @@ annotation OutputPort {
 
 class FunctionUnitProcessor extends AbstractClassProcessor {
     
+    AnnotationReference mainAnnotation
+    
     Iterable<? extends AnnotationReference> inputPortAnnotations
     Iterable<? extends AnnotationReference> outputPortAnnotations
     Iterable<? extends AnnotationReference> doubledInputAnnotations
@@ -53,15 +62,23 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     Object outputPortAnnotationArgument
     
         
-    override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
-        val functionUnitAnnotation = annotatedClass.annotations?.findFirst[annotationTypeDeclaration.simpleName == 'FunctionUnit']
+    private def static boolean isFunctionUnit(AnnotationReference mainAnnotation) {
+        return mainAnnotation.annotationTypeDeclaration.simpleName == 'FunctionUnit'
+    }
 
-        inputPortAnnotationArgument = functionUnitAnnotation?.getValue("inputPorts")
+    private def static boolean isFunctionBoard(AnnotationReference mainAnnotation) {
+        return mainAnnotation.annotationTypeDeclaration.simpleName == 'FunctionBoard'
+    }
+    
+    override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
+        mainAnnotation = annotatedClass.annotations?.findFirst[ isFunctionUnit || isFunctionBoard ]
+
+        inputPortAnnotationArgument = mainAnnotation?.getValue("inputPorts")
         if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
             inputPortAnnotations = inputPortAnnotationArgument as AnnotationReference[]
             doubledInputAnnotations = inputPortAnnotations.doubledAnnotations
             
-            if (doubledInputAnnotations.empty)
+            if (doubledInputAnnotations.empty && mainAnnotation.isFunctionUnit)
                 inputPortAnnotations.forEach[ inputPortAnnotation |
                     context.registerInterface(
                         getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
@@ -69,7 +86,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ]
         }
         
-        outputPortAnnotationArgument = functionUnitAnnotation?.getValue("outputPorts")
+        outputPortAnnotationArgument = mainAnnotation?.getValue("outputPorts")
         if (outputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
             outputPortAnnotations = outputPortAnnotationArgument  as AnnotationReference[]
             doubledOutputAnnotations = outputPortAnnotations.doubledAnnotations
@@ -165,6 +182,9 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         
         if (outputPortAnnotations.empty)
             annotatedClass.addWarning("no output port defined")
+            
+        if (mainAnnotation.isFunctionBoard && annotatedClass.declaredMethods.size > 0)
+            annotatedClass.addWarning("a FunctionBoard must not have methods")
     }
     
     private def checkForContextErrors(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
@@ -244,34 +264,40 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                           org.eclipse.xtend2.lib.StringConcatenation _builder = new org.eclipse.xtend2.lib.StringConcatenation();
                           _builder.append(«annotatedClass.simpleName».this, "");
                           _builder.append(".«portName»");
-                          final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
-                            public void apply(final «msgType» msg) {
-                              «annotatedClass.simpleName».this.«processInputMethodName»(msg);
-                            }
-                          };
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception> _function_1 = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception>() {
                             public void apply(final Exception it) {
                               «annotatedClass.simpleName».this.forwardIntegrationError(it);
                             }
                           };
+                          «IF (mainAnnotation.isFunctionBoard)»
+                          de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function_1);
+                          «ELSE»
+                          final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
+                            public void apply(final «msgType» msg) {
+                              «annotatedClass.simpleName».this.«processInputMethodName»(msg);
+                            }
+                          };
                           de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function, _function_1);
+                          «ENDIF»
                           return _inputPort;
                         }
                     }.apply();
                 ''']
             ])
-            
-            // add the interface to the list of implemented interfaces
-            val interfaceType = findInterface(inputPortInterfaceName)
-            annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[interfaceType.newTypeReference]
-            
-            interfaceType.addMethod(processInputMethodName) [
-                docComment = '''
-                    Implement this method to process input arriving via input port "«portName»".
-                    Message coming in has type "«msgType»".
-                '''
-                addParameter('msg', msgType)
-            ]
+
+            if (mainAnnotation.isFunctionUnit) {
+                // add the interface to the list of implemented interfaces
+                val interfaceType = findInterface(inputPortInterfaceName)
+                annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[interfaceType.newTypeReference]
+                
+                interfaceType.addMethod(processInputMethodName) [
+                    docComment = '''
+                        Implement this method to process input arriving via input port "«portName»".
+                        Message coming in has type "«msgType»".
+                    '''
+                    addParameter('msg', msgType)
+                ]
+            }
         ]
             
     }

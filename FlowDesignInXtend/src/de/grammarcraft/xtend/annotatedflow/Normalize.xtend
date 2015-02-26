@@ -1,10 +1,10 @@
 package de.grammarcraft.xtend.annotatedflow
 
-import de.grammarcraft.xtend.flow.annotations.FunctionUnit
+import de.grammarcraft.xtend.flow.annotations.FunctionBoard
 import de.grammarcraft.xtend.flow.annotations.InputPort
 import de.grammarcraft.xtend.flow.annotations.OutputPort
 
-@FunctionUnit(
+@FunctionBoard(
     inputPorts = #[
         @InputPort(name="input", type=String)
     ],
@@ -21,16 +21,8 @@ class Normalize {
     new() { 
         toLower.output -> lower
         toUpper.output -> upper
+        input -> toLower
+        input -> toUpper
     }
 
-    override processInput(String msg) {
-        toLower <= msg // input value forwarding
-        toUpper <= [ // input value forwarding by result of a closure
-            if (msg.length > 3) // meaningless! only to show arbitrary code may be specified here
-                msg
-            else 
-                msg
-        ]
-    }
-    
 }
