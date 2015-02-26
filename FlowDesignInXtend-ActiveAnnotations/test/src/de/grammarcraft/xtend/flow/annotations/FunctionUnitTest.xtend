@@ -110,6 +110,7 @@ class FunctionUnitTest {
             assertEquals(outputPortTypeName, outputPortType.toString)
 
             assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertInputPortInterfaceGenerated(inputPortName, inputPortType, className, clazz, ctx)
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
@@ -156,6 +157,7 @@ class FunctionUnitTest {
             assertEquals(outputPortTypeName, outputPortType.toString)
 
             assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertInputPortInterfaceGenerated(inputPortName, inputPortType, className, clazz, ctx)
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
@@ -210,7 +212,9 @@ class FunctionUnitTest {
             assertEquals(outputPortTypeName, outputPortType.toString)
 
             assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertInputPortInterfaceGenerated(inputPortName, inputPortType, className, clazz, ctx)
             assertInputPortGenerated(inputPort2Name, inputPort2Type, className, clazz, ctx)            
+            assertInputPortInterfaceGenerated(inputPort2Name, inputPort2Type, className, clazz, ctx)
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodNOTGenerated(className, inputPortType, clazz, ctx)
@@ -263,6 +267,7 @@ class FunctionUnitTest {
             assertEquals(output2PortTypeName, output2PortType.toString)
 
             assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertInputPortInterfaceGenerated(inputPortName, inputPortType, className, clazz, ctx)
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             assertOutputPortGenerated(output2PortName, output2PortType, className, clazz, ctx)
             
@@ -314,6 +319,7 @@ class FunctionUnitTest {
             assertEquals('''«outputPortTypeName»<«outputPortTypeParameters»>'''.toString, outputPortType.toString)
 
             assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertInputPortInterfaceGenerated(inputPortName, inputPortType, className, clazz, ctx)
             assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
             
             assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
@@ -323,15 +329,82 @@ class FunctionUnitTest {
         ]
     }
     
+    @Test def void test_FunctionBoard() {
+        val className = 'MyFunctionBoard'
+        val inputPortName = 'input'
+        val inputPortTypeName = 'String'
+        val outputPortName = 'output'
+        val outputPortTypeName = 'String'
+        '''
+            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
+            import de.grammarcraft.xtend.flow.annotations.FunctionBoard
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
+        
+            @FunctionUnit(
+                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@OutputPort(name="out", type=«outputPortTypeName»)]
+            )
+            class A {
+                override processIn(«inputPortTypeName» msg) {
+                    out <= msg;
+                }
+            }
+
+            @FunctionUnit(
+                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@OutputPort(name="out", type=«outputPortTypeName»)]
+            )
+            class B {
+                override processIn(«inputPortTypeName» msg) {
+                    out <= msg;
+                }
+            }
+
+            @FunctionBoard(
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                ],
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                ]
+            )
+            class «className» {
+                val A A = new A
+                val B B = new B
+                new() {
+                    «inputPortName» -> A
+                    A -> B
+                    B -> «outputPortName»
+                }
+            }
+        '''.compile [
+            val extension ctx = transformationContext
+
+            val clazz = findClass(className)
+            val inputPortType = String.newTypeReference
+            val outputPortType = String.newTypeReference
+            
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
+
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)
+            assertInputPortInterfaceNOTGenerated(inputPortName, inputPortType, className, clazz, ctx)
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
+            
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
+
+        ]
+    }
     
-    
-    
-    private def assertInputPortGenerated(String inputPortName, TypeReference inputPortType, String className, 
+    private def assertInputPortInterfaceGenerated(String inputPortName, TypeReference inputPortType, String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
         val interf = findInterface(className.interfaceName(inputPortName))
+        assertNotNull(interf)
         
-        // input ports
         assertTrue('''class '«className»' does not implement required interface '«className.interfaceName(inputPortName)»' ''', 
             clazz.implementedInterfaces.exists[it.name == interf.qualifiedName]
         )
@@ -351,7 +424,25 @@ class FunctionUnitTest {
         assertTrue('''method '«inputPortName.processMethodName»' does not exist at «className»''', 
             clazz.declaredMethods.exists[simpleName == inputPortName.processMethodName]
         )
+            
+    }
+
+    private def assertInputPortInterfaceNOTGenerated(String inputPortName, TypeReference inputPortType, String className, 
+        MutableClassDeclaration clazz, extension TransformationContext ctx) 
+    {
+        assertNull('''overriding interface for input port '«inputPortName»' found, but must not be defined for function board''', 
+            findInterface(className.interfaceName(inputPortName))
+        )
         
+        assertFalse('''method '«inputPortName.processMethodName»' exist at «className» but function boards must not define methods''', 
+            clazz.declaredMethods.exists[simpleName == inputPortName.processMethodName]
+        )
+        
+    }
+    
+    private def assertInputPortGenerated(String inputPortName, TypeReference inputPortType, String className, 
+        MutableClassDeclaration clazz, extension TransformationContext ctx) 
+    {
         assertTrue('''field '«inputPortName»' does not exist''', 
             clazz.declaredFields.exists[simpleName == inputPortName]
         )
