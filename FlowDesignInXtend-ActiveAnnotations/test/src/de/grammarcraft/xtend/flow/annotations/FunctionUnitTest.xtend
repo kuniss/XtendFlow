@@ -18,6 +18,7 @@ import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.junit.Test
 
 import static org.junit.Assert.*
+import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 class FunctionUnitTest {
 
@@ -450,8 +451,18 @@ class FunctionUnitTest {
             assertEquals('''field '«simpleName»' is not of type «de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType)»''', 
                 de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType), type
             )
+            assertEquals('''field '«inputPortName»' is not delared private''', Visibility::PRIVATE, visibility)
         ]
         
+        assertTrue('''getter '«inputPortName»' does not exist''', 
+            clazz.declaredMethods.exists[simpleName == inputPortName]
+        )
+        clazz.declaredMethods.filter[simpleName == inputPortName].head => [
+            assertEquals('''getter '«simpleName»' is not of type «de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType)»''', 
+                de.grammarcraft.xtend.flow.InputPort.newTypeReference(inputPortType), returnType
+            )
+            assertEquals('''getter '«inputPortName»' is not delared public''', Visibility::PUBLIC, visibility)
+        ]        
     }
     
     private def assertOutputPortGenerated(String outputPortName, TypeReference outputPortType, String className, 
@@ -464,7 +475,19 @@ class FunctionUnitTest {
             assertEquals('''field '«simpleName»' is not of type «de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType)»''', 
                 de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType), type
             )
+            assertEquals('''field '«outputPortName»' is not delared private''', Visibility::PRIVATE, visibility)
         ]
+
+        assertTrue('''getter '«outputPortName»' does not exist''', 
+            clazz.declaredMethods.exists[simpleName == outputPortName]
+        )
+        clazz.declaredMethods.filter[simpleName == outputPortName].head => [
+            assertEquals('''getter '«simpleName»' is not of type «de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType)»''', 
+                de.grammarcraft.xtend.flow.OutputPort.newTypeReference(outputPortType), returnType
+            )
+            assertEquals('''getter '«outputPortName»' is not delared public''', Visibility::PUBLIC, visibility)
+        ]
+
     }
 
     private def assertLessEqualsThanOperatorsGenerated(String className, TypeReference inputPortType,

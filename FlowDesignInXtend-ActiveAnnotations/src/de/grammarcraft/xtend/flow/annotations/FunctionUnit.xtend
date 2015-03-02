@@ -157,7 +157,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
      * Adds "implements FunctionUnitWithOnlyOneInputPort<?>" if only one input port defined.
      * Add "implements FunctionUnitWithOnlyOneOutputPort<?>" if only one output port defined
      */
-    def addInterfaces(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+    def private addInterfaces(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
         if (inputPortAnnotations.size == 1 || outputPortAnnotations.size == 1) 
         {
             val List<TypeReference> interfacesToBeAdded = new ArrayList
@@ -264,7 +264,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             
             annotatedClass.addField(portName, [
                 final = true
-                visibility = Visibility::PUBLIC
+                visibility = Visibility::PRIVATE
                 type = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType) // msgType.newWildcardTypeReferenceWithLowerBound?
                 initializer = ['''
                     new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.InputPort<«msgType»>>() {
@@ -290,6 +290,18 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                           return _inputPort;
                         }
                     }.apply();
+                ''']
+            ])
+            
+            annotatedClass.addMethod(portName, [
+                final = true
+                returnType = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType)
+                docComment = '''
+                    Input port '«portName»' of function unit '«annotatedClass.simpleName»', receives messages of 
+                    type '«msgType»' for further processing by this function unit.
+                '''
+                body = ['''
+                    return this.«portName»;
                 ''']
             ])
 
@@ -318,7 +330,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             // add output port
             annotatedClass.addField(portName, [
                 final = true
-                visibility = Visibility::PUBLIC
+                visibility = Visibility::PRIVATE
                 type = de.grammarcraft.xtend.flow.OutputPort.newTypeReference(msgType)
                 initializer = ['''
                   new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.OutputPort<«msgType»>>() {
@@ -337,10 +349,24 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                   }.apply();
                 ''']
             ])
+            
+            annotatedClass.addMethod(portName, [
+                final = true
+                returnType = de.grammarcraft.xtend.flow.OutputPort.newTypeReference(msgType)
+                docComment = '''
+                    Output port '«portName»' of function unit '«annotatedClass.simpleName»', issues messages of 
+                    type '«msgType»' as computation result of this function unit.
+                '''
+                body = ['''
+                    return this.«portName»;
+                ''']
+            ])
+
+            
         ]
     }
     
-    def addFlowOperators(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+    def private addFlowOperators(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
 
         if (inputPortAnnotations.size == 1) 
         {
@@ -348,6 +374,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             val msgType = inputPortAnnotations.head.portType.type.newTypeReference(inputPortAnnotations.head.portTypeParameters)
             
             annotatedClass.addMethod('theOneAndOnlyInputPort', [
+                final = true
                 returnType = de.grammarcraft.xtend.flow.InputPort.newTypeReference(msgType)
                 body = ['''
                     return this.«portName»;
