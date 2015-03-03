@@ -1,0 +1,50 @@
+Wiring operations
+=================
+
+1. fu -> fu'                [fu: if only one output port; fu': if only one input port] 
+2. fu -> fu'.input          [fu: if only one output port]
+3. fu.output -> fu'         [fu': if only one input port]
+4. fu.output -> fu'.input
+5. fu.output -> closure
+6. fu -> closure            [fu: if only one output port]
+
+7. fu.output -> output      [applies inside integration unit]
+8. fu -> output             [applies inside integration unit]
+9. input -> fu.input        [applies inside integration unit]
+10.input -> fu              [applies inside integration unit]
+
+Forwarding operations
+=====================
+
+1. fu <= input value                [fu: if only one input port]
+2. fu <= input value closure        [fu: if only one input port]
+3. fu.input <= input value 
+4. fu.input <= input value closure
+
+5. .output <= output value           
+6. .output <= output value closure
+
+Operation partitioned by left side type
+=======================================
+FunctionUnitWithOnlyOneOutputPort
++    fu -> fu'                       sig: -> (FunctionUnitWithOnlyOneInputPort<MessageType>) e.g. RunFlow
++    fu -> fu'.input                 sig: -> (InputPort<MessageType>) e.g. 1RunFlow
+-    fu -> .output                   sig: -> (OutputPort<MessageType>)
+-    fu -> closure                   sig: -> (()=><MessageType>)
+FunctionUnitWithOnlyOneInputPort
++    fu <= input value               sig: <= (<MessageType>) e.g. Normalize, RunFlow
++    fu <= input value closure       sig: <= (()=><MessageType>) e.g. Normalize
+    
+InputPort
++    fu.input <= input value         sig: <= (<MessageType>) e.g. RunFlow
+-    fu.input <= input value closure sig: <= (()=><MessageType>)
+-    .input -> fu.input              sig: -> (InputPort<MessageType>)
+-    .input -> fu                    sig: -> (FuntionUnitWithOnlyOneInputPort<MessageType>)
+
+OutputPort
+-    fu.output -> fu'                sig: -> (FunctionUnitWithOnlyOneInputType<MessageType>)
++    fu.output -> fu'.input          sig: -> (InputPort<MessageType>) e.g. RunFlow
++    fu.output -> .output            sig: -> (OutputPort<MessageType>) e.g. Normalize
++    fu.output -> closure            sig: -> (()=><MessageType>) e.g. RunFlow
++    .output <= output value         sig: <= (<MessageType>) e.g. Collector
++    .output <= output value closure sig: <= (()=><MessageType>) e.g. Collector
