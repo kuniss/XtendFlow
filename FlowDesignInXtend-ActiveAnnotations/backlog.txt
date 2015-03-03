@@ -1,0 +1,12 @@
+- allow on the fly mapping function units declaration a la "val MapIt<String, String> a = new MapIt[toUpper]"
+- set up function unit tool set package containing MapIt and other standard FUs 
+
+Done
+------
+- rename function unit input port overriding method to "process$<input port name> 
+- add getter for OutputPorts and InputPorts to avoid overriding
+- generate all operators attached to function unit (e.g. ToLower) required by FuntionUnitWithOnlyOneIN|OUTputPort
+- add units tests for all connection operation and forwarding operation options
+- add annotation @FunctionBoard which marks integrating function units and has constructor only but no other methods
+- logs warnings if a function board has other methods than constructor
+  
