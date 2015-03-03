@@ -26,7 +26,7 @@ class FunctionUnitTest {
     
     private def String interfaceName(String className, String inputPortName) '''«className»_InputPort_«inputPortName»'''
 
-    private def String processMethodName(String inputPortName) '''process«inputPortName.toFirstUpper»'''
+    private def String processMethodName(String inputPortName) '''process$«inputPortName»'''
     
     @Test def void test_String_typed_ports() {
         val className = 'MyFunctionUnit'

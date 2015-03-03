@@ -260,7 +260,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             val portName = inputPortAnnotation.portName
             val inputPortInterfaceName = getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
             val msgType = inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
-            val processInputMethodName = '''process«portName.toFirstUpper»'''
+            val processInputMethodName = '''process$«portName»'''
             
             annotatedClass.addField(portName, [
                 final = true

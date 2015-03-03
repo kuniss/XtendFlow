@@ -27,7 +27,7 @@ class OperationTest {
     )
     static class A {
         
-        override processIn(String msg) {
+        override process$in(String msg) {
             val addedInputPortSignature = OperationTest.forwardTrough(in, msg)
             out <= OperationTest.forwardTrough(out, addedInputPortSignature)
         }
@@ -44,7 +44,7 @@ class OperationTest {
     static class B {
         
         
-        override processIn(String msg) {
+        override process$in(String msg) {
             out <= OperationTest.forwardTrough(out, OperationTest.forwardTrough(in, msg))
         }
        
@@ -153,7 +153,7 @@ class OperationTest {
          * Test operation fu -> .output
          */
         new() { A -> out }
-        override processIn(String msg) { 
+        override process$in(String msg) { 
             A <= forwardTrough(in, msg)
         }
         
@@ -182,7 +182,7 @@ class OperationTest {
          * Test operation fu.output -> .output
          */
         new() { A.out -> out }
-        override processIn(String msg) { 
+        override process$in(String msg) { 
             A <= forwardTrough(in, msg)
         }
     }
@@ -208,9 +208,10 @@ class OperationTest {
         /**
          * .output <= [output value closure]
          */
-        override processIn(String msg) { 
+        override process$in(String msg) { 
             out <= [forwardTrough(out, forwardTrough(in, msg))]
         }
+        
     }
 
     /**
@@ -220,6 +221,15 @@ class OperationTest {
         val C C = new C
         C.out -> [assertEquals('start-C.in-C.out', it)]
         C.in <= 'start'
+    }
+    
+    @Test def test_Java_identifiers() {
+        var int i
+        for (i = Character.MIN_CODE_POINT; i <= Character.MAX_CODE_POINT; i++)
+           if (Character.isJavaIdentifierStart(i) && !Character.isAlphabetic(i)) {
+                System.out.print(i as char)
+                System.out.print(" ");
+           }
     }
     
 }

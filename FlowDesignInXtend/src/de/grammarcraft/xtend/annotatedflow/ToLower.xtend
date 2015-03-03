@@ -15,7 +15,7 @@ import de.grammarcraft.xtend.flow.annotations.OutputPort
 class ToLower {
     
     // This method implements the semantic of the function unit
-    override processInput(String msg) {
+    override process$input(String msg) {
         output <= msg.toLowerCase;
     }
     

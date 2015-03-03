@@ -26,11 +26,11 @@ class Collector {
         this.separator = separator;
     }
     
-    override processLower(String msg) {
+    override process$lower(String msg) {
         accumulateInput(msg)
     }
     
-    override processUpper(String msg) {
+    override process$upper(String msg) {
         accumulateInput(msg)
     }
     
