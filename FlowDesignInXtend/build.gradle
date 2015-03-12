@@ -6,7 +6,7 @@ plugins {
 repositories.jcenter()
 
 dependencies {
-  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
+  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.8.+'
   compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.2.+'
   compile 'junit:junit:4.+' 
 }
