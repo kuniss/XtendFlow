@@ -18,7 +18,7 @@ class InputPort<MessageType> {
      * Creates a named input port with the given port name.
      * @param name the name of the port
      * @param processInputOperation the closure to be applied to an input message received over this port
-     * @param intergationErrorOperation the closure to be executed if the input processing closure given before is null
+     * @param integrationErrorOperation the closure to be executed if the input processing closure given before is null
      */
     new(String name, (MessageType)=>void processInputOperation, (Exception)=>void integrationErrorOperation) {
         this.name = name
@@ -31,7 +31,7 @@ class InputPort<MessageType> {
      * This is intended to be used inside integration function units where the input processing closure is defined at the constructor by
      * an dedicated wiring operation.
      * @param name the name of the port
-     * @param intergationErrorOperation the closure to be executed if the input processing closure is not defined
+     * @param errorOperation the closure to be executed if the input processing closure is not defined
      */
     new(String name, (Exception)=>void errorOperation) {
         this(name, null, errorOperation)    

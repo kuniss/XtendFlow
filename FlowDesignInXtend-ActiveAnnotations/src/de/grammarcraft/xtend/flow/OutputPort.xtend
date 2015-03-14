@@ -19,7 +19,7 @@ class OutputPort<MessageType> {
     /**
      * Creates a named output port with the given port name.
      * @param name the name of the port
-     * @param intergationErrorOperation the closure to be executed if no foreign input port at all has been bound to this output port
+     * @param integrationErrorOperation the closure to be executed if no foreign input port at all has been bound to this output port
      */
     new(String name, (Exception)=>void integrationErrorOperation) {
         this.name = name
