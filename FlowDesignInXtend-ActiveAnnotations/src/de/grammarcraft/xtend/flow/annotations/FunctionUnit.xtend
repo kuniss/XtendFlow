@@ -135,12 +135,16 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         annotatedClass.final = true
         
         annotatedClass.docComment = '''
+            «annotatedClass.docComment»
+            «if (!(annotatedClass.docComment == null || annotatedClass.docComment.empty)) '<br><br>'»
             Implements a function unit as defined by Flow Design paradigm.<br>
             It consumes input messages over the input ports<br>
                 «inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
             And issues computation results over the output ports<br>
                 «outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
         '''
+        
+        addClassCommentToConstructors(annotatedClass, context)
         
         addInterfaces(annotatedClass, context)
         
@@ -153,6 +157,22 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         addOutputPorts(annotatedClass, context)
         
         addFlowOperators(annotatedClass, context)
+    }
+    
+    /**
+     * Adds the class documentation to all constructors after the user's given documentation.
+     * This is done because in Xtend the types are typically not given when instantiating 
+     * a function unit. By promoting the class documentation to constructors they will
+     * become visible by hovers in IDEs.
+     */
+    def private static addClassCommentToConstructors(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        annotatedClass.declaredConstructors.forEach[ 
+            docComment = '''
+                «docComment»
+                «if (!(docComment == null || docComment.empty)) '<br><br>'»
+                «annotatedClass.docComment»
+            '''
+        ]
     }
     
     /**

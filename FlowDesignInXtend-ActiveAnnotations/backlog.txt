@@ -1,10 +1,14 @@
 - allow on the fly mapping function units declaration a la "val MapIt<String, String> a = new MapIt[toUpper]"
 - set up function unit tool set package containing MapIt and other standard FUs
 - issue warning about usage of Xtend's pairing operator on function units with more than one input or output port  
-- check and improve and user documentation forwarding to constructor
+- add FunctionUnitInterface to allow function units and their ports be defined as Xtend interface inclusively
+  binding semantic requirements and constraints to it 
+- promote user's javadoc port documentation to the generated port artifacts
 
 Done
 ------
+- check and improve and user documentation forwarding to class and constructor - constructor as in Xtend 
+  no type specification is needed on construction
 - get rid FunctionUnitBase class, use interface instead
 - rename function unit input port overriding method to "process$<input port name> 
 - add getter for OutputPorts and InputPorts to avoid overriding

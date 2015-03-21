@@ -6,6 +6,11 @@ import java.util.ArrayList
 import de.grammarcraft.xtend.flow.annotations.InputPort
 import de.grammarcraft.xtend.flow.annotations.OutputPort
 
+/**
+ * Collects the input arriving over ports 'lower' and 'upper' 
+ * by concatenating them and forwards the concatenation result
+ * to port 'output'.
+ */
 @FunctionUnit(
     inputPorts = #[
         @InputPort(name="lower", type=String),
