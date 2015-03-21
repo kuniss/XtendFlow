@@ -8,8 +8,9 @@
 
 package de.grammarcraft.xtend.flow.annotations
 
-import de.grammarcraft.xtend.flow.FunctionUnitBase
 import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort
+import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneOutputPort
+import de.grammarcraft.xtend.flow.IFunctionUnit
 import java.util.ArrayList
 import java.util.List
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
@@ -22,6 +23,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.eclipse.xtext.xbase.lib.Functions.Function0
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 
 @Active(FunctionUnitProcessor)
 annotation FunctionUnit {
@@ -130,8 +132,6 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             
         checkForContextWarnings(context, annotatedClass)
         
-        // add extends clause 
-        annotatedClass.extendedClass = FunctionUnitBase.newTypeReference
         annotatedClass.final = true
         
         annotatedClass.docComment = '''
@@ -145,6 +145,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         addInterfaces(annotatedClass, context)
         
         addNamingStuff(annotatedClass, context)
+        
+        addIntegrationErrorPort(annotatedClass, context)
                     
         addInputPorts(annotatedClass, context) 
         
@@ -157,15 +159,19 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
      * Adds "implements FunctionUnitWithOnlyOneInputPort<?>" if only one input port defined.
      * Add "implements FunctionUnitWithOnlyOneOutputPort<?>" if only one output port defined
      */
-    def private addInterfaces(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+    def private addInterfaces(MutableClassDeclaration annotatedClass, extension TransformationContext context) 
+    {
+        val List<TypeReference> interfacesToBeAdded = new ArrayList
+    
+        interfacesToBeAdded.add(IFunctionUnit.newTypeReference)    
+        
         if (inputPortAnnotations.size == 1 || outputPortAnnotations.size == 1) 
         {
-            val List<TypeReference> interfacesToBeAdded = new ArrayList
         
             if (inputPortAnnotations.size == 1) {
                 val inputPortAnnotation = inputPortAnnotations.head
                 interfacesToBeAdded.add( 
-                    de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort.newTypeReference(
+                    FunctionUnitWithOnlyOneInputPort.newTypeReference(
                         inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
                     )
                 )
@@ -174,13 +180,13 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             if (outputPortAnnotations.size == 1) {
                 val outputPortAnnotation = outputPortAnnotations.head
                 interfacesToBeAdded.add( 
-                    de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneOutputPort.newTypeReference(
+                    FunctionUnitWithOnlyOneOutputPort.newTypeReference(
                         outputPortAnnotation.portType.type.newTypeReference(outputPortAnnotation.portTypeParameters)
                     )
                 )
             }
-            annotatedClass.implementedInterfaces = interfacesToBeAdded
         }
+        annotatedClass.implementedInterfaces = interfacesToBeAdded
     }
     
     
@@ -254,6 +260,42 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         ])
     }
     
+    /**
+     * Adds methods and fields for implementing {@link IFunctionUnit}.
+     */
+    def private addIntegrationErrorPort(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        val integrationErrorPortName = 'integrationError'
+        annotatedClass.addField(integrationErrorPortName, [
+            final = true
+            visibility = Visibility::PRIVATE
+            type = de.grammarcraft.xtend.flow.OutputPort.newTypeReference(Exception.newTypeReference)
+            initializer = ['''
+                new «de.grammarcraft.xtend.flow.OutputPort.name»<«Exception.name»>("integrationError", 
+                    new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«Exception.name»>() {
+                      @Override
+                      public void apply(final «Exception.name» ex) {
+                        String _message = ex.getMessage();
+                        String _plus = ("FATAL ERROR: " + _message);
+                        «InputOutput.name».<String>println(_plus);
+                      }
+                    }
+                )
+            ''']
+        ])
+        annotatedClass.addMethod(integrationErrorPortName, [
+            final = true
+            returnType = de.grammarcraft.xtend.flow.OutputPort.newTypeReference(Exception.newTypeReference)
+            body = ['''return this.«integrationErrorPortName»;''']
+        ])
+        annotatedClass.addMethod('forwardIntegrationError', [
+            final = true
+            val parameterName = 'integrationException'
+            addParameter(parameterName, Exception.newTypeReference)
+            body = ['''this.«integrationErrorPortName».operator_lessEqualsThan(«parameterName»);''']
+        ])
+    }
+    
+
     private def addInputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
         inputPortAnnotations.forEach[ inputPortAnnotation |
                 

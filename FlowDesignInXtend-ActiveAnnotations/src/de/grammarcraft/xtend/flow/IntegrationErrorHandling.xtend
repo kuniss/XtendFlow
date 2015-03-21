@@ -13,7 +13,7 @@ import java.util.List
 abstract class IntegrationErrorHandling {
     
     static def void onIntegrationErrorAt(
-        List<? extends FunctionUnitBase> functionUnits, 
+        List<? extends IFunctionUnit> functionUnits, 
         (Exception)=>void errorOperation
     )
     {
