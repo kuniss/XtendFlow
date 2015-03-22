@@ -217,8 +217,10 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         if (outputPortAnnotations.empty)
             annotatedClass.addWarning("no output port defined")
             
-        if (mainAnnotation.isFunctionBoard && annotatedClass.declaredMethods.size > 0)
-            annotatedClass.addWarning("a FunctionBoard must not have methods")
+        if (mainAnnotation.isFunctionBoard && annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].size > 0)
+            annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].forEach[
+                addWarning("a FunctionBoard must not have other than private methods")
+            ]
     }
     
     private def checkForContextErrors(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
