@@ -1,10 +1,11 @@
 - allow on the fly mapping function units declaration a la "val MapIt<String, String> a = new MapIt[toUpper]"
-- set up function unit tool set package containing MapIt and other standard FUs
+- set up function unit tool set package containing MapIt and other standard FUs, e.g. Join
 - issue warning about usage of Xtend's pairing operator on function units with more than one input or output port  
 - add FunctionUnitInterface to allow function units and their ports be defined as Xtend interface inclusively
   binding semantic requirements and constraints to it 
 - promote user's javadoc port documentation to the generated port artifacts
 - maybe, @FunctionUnit and @FunctionBoard should be renamed to @FlowOperation and @FlowIntegration respectively; @InputPort and @OutputPort then should be renamed to @Input and @Output respectively
+- define own exception type for integration errors containing erroneous port name 
 
 Done
 ------

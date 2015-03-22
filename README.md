@@ -157,7 +157,7 @@ An integration error is given if a declared output port is not connected to any 
 However, this connection may be overridden by the library user, explicitly forwarding the exception to an user defined closure or input port.
 
 ```
-fu.intergatonError -> [ log.fatal("integration error happened: {0}", exception.message) ] 
+fu.integrationError -> [ log.fatal("integration error happened: {0}", exception.message) ] 
 ```
 
 as this may become a hassle if for all instantiated function units the same closure has to be connected, there is an helper expression implemented where a bunch function units may be connected at once to one closure:
