@@ -4,6 +4,7 @@
 - add FunctionUnitInterface to allow function units and their ports be defined as Xtend interface inclusively
   binding semantic requirements and constraints to it 
 - promote user's javadoc port documentation to the generated port artifacts
+- maybe, @FunctionUnit and @FunctionBoard should be renamed to @FlowOperation and @FlowIntegration respectively; @InputPort and @OutputPort then should be renamed to @Input and @Output respectively
 
 Done
 ------
