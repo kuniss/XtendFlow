@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>de.grammarcraft.xtend.flow</name>
-	<comment></comment>
+	<comment>Flow Design Library Implementation for Xtend</comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -19,6 +19,7 @@
 	<natures>
 		<nature>org.springsource.ide.eclipse.gradle.core.nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.jdt.groovy.core.groovyNature</nature>
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
 	</natures>
 </projectDescription>
