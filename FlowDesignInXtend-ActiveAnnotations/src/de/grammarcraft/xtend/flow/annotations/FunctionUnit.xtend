@@ -26,6 +26,16 @@ import org.eclipse.xtext.xbase.lib.Functions.Function0
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 
 @Active(FunctionUnitProcessor)
+annotation Unit {
+    // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
+    InputPort[] inputPorts = #[]
+    OutputPort[] outputPorts = #[]
+}
+
+annotation Operation {}
+annotation Integration {}
+
+@Active(FunctionUnitProcessor)
 annotation FunctionUnit {
     // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
     InputPort[] inputPorts = #[]
@@ -54,6 +64,7 @@ annotation OutputPort {
 class FunctionUnitProcessor extends AbstractClassProcessor {
     
     AnnotationReference mainAnnotation
+    AnnotationReference unitModifier
     
     Iterable<? extends AnnotationReference> inputPortAnnotations
     Iterable<? extends AnnotationReference> outputPortAnnotations
@@ -64,23 +75,50 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     Object outputPortAnnotationArgument
     
         
-    private def static boolean isFunctionUnit(AnnotationReference mainAnnotation) {
-        return mainAnnotation.annotationTypeDeclaration.simpleName == 'FunctionUnit'
+    private def static boolean isFunctionUnit(AnnotationReference annotation) {
+        return annotation?.annotationTypeDeclaration?.qualifiedName == FunctionUnit.name
     }
 
-    private def static boolean isFunctionBoard(AnnotationReference mainAnnotation) {
-        return mainAnnotation.annotationTypeDeclaration.simpleName == 'FunctionBoard'
+    private def static boolean isFunctionBoard(AnnotationReference annotation) {
+        return annotation?.annotationTypeDeclaration?.qualifiedName == FunctionBoard.name
+    }
+    
+    private def static boolean isFlowUnit(AnnotationReference annotation) {
+        return annotation?.annotationTypeDeclaration?.qualifiedName == Unit.name
+    }
+    
+    private def static boolean isOperation(AnnotationReference annotation) {
+        return annotation?.annotationTypeDeclaration?.qualifiedName == Operation.name
+    }
+
+    private def static boolean isIntegration(AnnotationReference annotation) {
+        return annotation?.annotationTypeDeclaration?.qualifiedName == Integration.name
+    }
+    
+    /**
+     * @return true if the processed class is annotated with @Integration @Unit
+     */
+    private def boolean isIntegrationUnit() {
+        return this.mainAnnotation.isFlowUnit && this.unitModifier.isIntegration
+    }
+
+    /**
+     * @return true if the processed class is annotated with @Operation @Unit
+     */
+    private def boolean isOperationUnit() {
+        return this.mainAnnotation.isFlowUnit && this.unitModifier.isOperation
     }
     
     override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
-        mainAnnotation = annotatedClass.annotations?.findFirst[ isFunctionUnit || isFunctionBoard ]
+        mainAnnotation = annotatedClass.annotations?.findFirst[ functionUnit || functionBoard || flowUnit ]
+        unitModifier = annotatedClass.annotations?.findFirst[ operation || integration ]
 
         inputPortAnnotationArgument = mainAnnotation?.getValue("inputPorts")
         if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
             inputPortAnnotations = inputPortAnnotationArgument as AnnotationReference[]
             doubledInputAnnotations = inputPortAnnotations.doubledAnnotations
             
-            if (doubledInputAnnotations.empty && mainAnnotation.isFunctionUnit)
+            if (doubledInputAnnotations.empty && (mainAnnotation.isFunctionUnit || operationUnit))
                 inputPortAnnotations.forEach[ inputPortAnnotation |
                     context.registerInterface(
                         getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
@@ -217,10 +255,13 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         if (outputPortAnnotations.empty)
             annotatedClass.addWarning("no output port defined")
             
-        if (mainAnnotation.isFunctionBoard && annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].size > 0)
+        if ((mainAnnotation.isFunctionBoard || integrationUnit) && 
+            annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].size > 0)
+        {
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].forEach[
                 addWarning("a FunctionBoard must not have other than private methods")
             ]
+        }
     }
     
     private def checkForContextErrors(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
@@ -341,7 +382,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                               «annotatedClass.simpleName».this.forwardIntegrationError(it);
                             }
                           };
-                          «IF (mainAnnotation.isFunctionBoard)»
+                          «IF (mainAnnotation.isFunctionBoard || integrationUnit)»
                           de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function_1);
                           «ELSE»
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
@@ -369,7 +410,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ''']
             ])
 
-            if (mainAnnotation.isFunctionUnit) {
+            if (mainAnnotation.isFunctionUnit || operationUnit) {
                 // add the interface to the list of implemented interfaces
                 val interfaceType = findInterface(inputPortInterfaceName)
                 annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[interfaceType.newTypeReference]
