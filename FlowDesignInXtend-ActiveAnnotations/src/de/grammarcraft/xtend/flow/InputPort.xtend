@@ -8,10 +8,14 @@
 
 package de.grammarcraft.xtend.flow
 
+import java.util.List
+import java.util.ArrayList
+
 class InputPort<MessageType> {
 
     val String name
-    (MessageType)=>void processInputOperation
+    val (MessageType)=>void processInputOperation
+    val List<(MessageType)=>void> inputOperations = new ArrayList
     val (Exception)=>void integrationErrorOperation
 
     /**
@@ -31,10 +35,25 @@ class InputPort<MessageType> {
      * This is intended to be used inside integration function units where the input processing closure is defined at the constructor by
      * an dedicated wiring operation.
      * @param name the name of the port
-     * @param errorOperation the closure to be executed if the input processing closure is not defined
+     * @param integrationErrorOperation the closure to be executed if the input processing closure is not defined
      */
-    new(String name, (Exception)=>void errorOperation) {
-        this(name, null, errorOperation)    
+    new(String name, (Exception)=>void integrationErrorOperation) {
+        this.name = name
+        this.processInputOperation = [forward]
+        this.integrationErrorOperation = integrationErrorOperation
+    }
+    
+    private def forward(MessageType msg) {
+        if (!inputOperations.empty) {
+            inputOperations.forEach[
+                operation | operation.apply(msg)
+            ]
+        }
+        else {
+            integrationErrorOperation.apply(
+                new RuntimeException(
+                    '''no binding defined for '«this»' - message '«msg»' could not be delivered.'''))
+        }
     }
     
     override toString() { this.name }
@@ -85,7 +104,7 @@ class InputPort<MessageType> {
      * the an input port of an function unit which is integrated.
      */
     def void -> (InputPort<MessageType> integratedInputPort) {
-        this.processInputOperation = integratedInputPort.inputProcessingOperation
+        this.inputOperations.add(integratedInputPort.inputProcessingOperation)
     }
       
     /**
@@ -97,7 +116,7 @@ class InputPort<MessageType> {
      * the an input port of an function unit which is integrated.
      */
     def void -> (FunctionUnitWithOnlyOneInputPort<MessageType> integratedFunctionUnit) {
-        this.processInputOperation = integratedFunctionUnit.theOneAndOnlyInputPort.inputProcessingOperation
+        this.inputOperations.add(integratedFunctionUnit.theOneAndOnlyInputPort.inputProcessingOperation)
     }
 
 }

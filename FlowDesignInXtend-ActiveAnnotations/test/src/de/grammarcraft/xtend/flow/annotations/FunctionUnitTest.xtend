@@ -399,6 +399,80 @@ class FunctionUnitTest {
 
         ]
     }
+
+    @Test def void test_FunctionBoard_Splitting_Input() {
+        val className = 'MyFunctionBoard'
+        val inputPortName = 'input'
+        val inputPortTypeName = 'String'
+        val outputPort1Name = 'output1'
+        val outputPort1TypeName = 'String'
+        val outputPort2Name = 'output1'
+        val outputPort2TypeName = 'String'
+        '''
+            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
+            import de.grammarcraft.xtend.flow.annotations.FunctionBoard
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
+        
+            @FunctionUnit(
+                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@OutputPort(name="out", type=«outputPort1TypeName»)]
+            )
+            class A {
+                override processIn(«inputPortTypeName» msg) {
+                    out <= msg;
+                }
+            }
+
+            @FunctionUnit(
+                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@OutputPort(name="out", type=«outputPort1TypeName»)]
+            )
+            class B {
+                override processIn(«inputPortTypeName» msg) {
+                    out <= msg;
+                }
+            }
+
+            @FunctionBoard(
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                ],
+                outputPorts = #[
+                    @OutputPort(name="«outputPort1Name»", type=«outputPort1TypeName»)
+                ]
+            )
+            class «className» {
+                val A A = new A
+                val B B = new B
+                new() {
+                    «inputPortName» -> A
+                    «inputPortName» -> B
+                    A -> «outputPort1Name»
+                    B -> «outputPort2Name»
+                }
+            }
+        '''.compile [
+            val extension ctx = transformationContext
+
+            val clazz = findClass(className)
+            val inputPortType = String.newTypeReference
+            val outputPortType = String.newTypeReference
+            
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPort1TypeName, outputPortType.toString)
+            assertEquals(outputPort2TypeName, outputPortType.toString)
+
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)
+            assertInputPortInterfaceNOTGenerated(inputPortName, inputPortType, className, clazz, ctx)
+            assertOutputPortGenerated(outputPort1Name, outputPortType, className, clazz, ctx)
+            assertOutputPortGenerated(outputPort2Name, outputPortType, className, clazz, ctx)
+            
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
+        ]
+    }
     
     private def assertInputPortInterfaceGenerated(String inputPortName, TypeReference inputPortType, String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 

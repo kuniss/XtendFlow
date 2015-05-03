@@ -2,8 +2,7 @@ package de.grammarcraft.xtend.flow.annotations
 
 import org.junit.Test
 import static org.junit.Assert.*
-
-
+import org.junit.Ignore
 
 class OperationTest {
     
@@ -223,7 +222,7 @@ class OperationTest {
         C.in <= 'start'
     }
     
-    @Test def test_Java_identifiers() {
+    @Ignore @Test def test_Java_identifiers() {
         var int i
         for (i = Character.MIN_CODE_POINT; i <= Character.MAX_CODE_POINT; i++)
            if (Character.isJavaIdentifierStart(i) && !Character.isAlphabetic(i)) {
@@ -231,5 +230,33 @@ class OperationTest {
                 System.out.print(" ");
            }
     }
+    
+    @FunctionBoard(
+        inputPorts = #[@InputPort(name="in", type=String)],
+        outputPorts = #[
+            @OutputPort(name="outA", type=String),
+            @OutputPort(name="outB", type=String)
+        ]
+    )
+    static class FB {
+        A A = new A
+        B B = new B
+        new() {
+            in -> A
+            in -> B
+            A -> outA
+            B -> outB
+        }   
+    }
+    
+    @Test def test_function_board_splitting_input() {
+        val FB fb = new FB
+        val StringBuilder result = new StringBuilder
+        fb.outA -> [result.append(it).append(':')]
+        fb.outB -> [result.append(it)]
+        fb.in <= "start"
+        assertEquals('start-A.in-A.out:start-B.in-B.out', result.toString)
+    }
+    
     
 }
