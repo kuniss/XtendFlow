@@ -25,16 +25,81 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.eclipse.xtext.xbase.lib.Functions.Function0
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
 
+/**
+ * Represents an Function Unit in the sense of the Flow Design paradigm.
+ * It defines input ports for receiving data and output ports to forward computation results to
+ * other function units or for applying side effects.
+ */
 @Active(FunctionUnitProcessor)
 annotation Unit {
     // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
-    InputPort[] inputPorts = #[]
-    OutputPort[] outputPorts = #[]
+    /** 
+     * Defines on or more named Input Ports the function unit receives typed input data 
+     * over from other function units.<br>
+     * Each of the declared ports may be connected to other function unit's output ports using the 
+     * wiring operator: other_fu.out -> this_fu.a.<br>
+     * Each input port <i>a</i> message may be forwarded using the forward operator:
+     * this_fu.a <= message.<br>
+     * For integration units an integrated function unit input port may be connected to this unit's 
+     * input port forwarding input messages to those integrated function unit: 
+     * this_fu.i -> integrated_fu.in.
+     */
+    Port[] inputPorts = #[]
+    /** 
+     * Defines one or more named and typed Output Ports the computation results of this function unit are 
+     * forwarded over to other function units or to be processed for side effects.<br
+     * Each of the declared port <i>o</i> may be connected to other function unit's out ports using the 
+     * wiring operator: this_fu.o -> other_fu.in.<br>
+     * For integration units an integrated function unit output port may be connected to this unit's 
+     * output port forwarding computation result messages of those  unit to this function unit's 
+     * output port: integrated_fu.out -> this_fu.o.
+     */
+    Port[] outputPorts = #[]
 }
 
+/**
+ * {@link Unit} modifier marking a Function Unit as an operation in the sense of the Flow Design paradigm.
+ * The term <i>operation</i> has the same meaning as in the IODA architecture.<br>
+ * Operation units are implementing the real functionality of the software system. They are the basic 
+ * components of a software system wired together by {@link Integration} {@link Unit}s. 
+ * Only operation units contain logic and control flow implementations.<br>
+ * For every declared port <i>a</i> in this list of inputPorts a method <i>process$a</i> with a parameter 
+ * of the port's type must be implemented for processing the incoming messages.<br>
+ */
 annotation Operation {}
+
+/**
+ * {@link Unit} modifier marking a Function Unit as an integration in the sense of the Flow Design paradigm. 
+ * The term <i>integration</i> has the same meaning as in the IODA architecture.<br>
+ * Integration unit's only purpose is to integrate other function units by wiring them together defining
+ * the data flow between them. Integration units never contain logic and control flow implementations.<br>
+ * Typically, they only contain function unit instantiations and a constructor with wiring operations.
+ */
 annotation Integration {}
 
+/**
+ * Defines a Port in the sense of Flow Design. Over the port the associated Function Unit
+ * receives input data for processing from other function units or forwards computation
+ * results to other function units down stream.<br> 
+ * The port has a <i>name</i> and a <i>type</i> with optional type arguments. 
+ * This name and type is used for creating appropriate port types, getter, setter, and operation methods 
+ * allowing those ports to be wired up with other function unit ports.<br>
+ * Example:<br>
+ * <code>@Port(name="in", type=String)</code> is defining a port with name <i>in</i> of 
+ * type <i>java.lang.String</i><br>
+ * <code>@Port(name="in", type=Map, typeArguments=#[Integer,String])</code> is defining a port 
+ * with name <i>in</i> of the generic type <i>Map&lt;Integer,String&gt;</i><br>
+ */
+annotation Port {
+    String name
+    Class<?> type
+    Class<?>[] typeArguments = #[]
+}
+
+/**
+ * Use annotations {@link Operation} {@link Unit} both together.
+ */
+@Deprecated
 @Active(FunctionUnitProcessor)
 annotation FunctionUnit {
     // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
@@ -42,6 +107,10 @@ annotation FunctionUnit {
     OutputPort[] outputPorts = #[]
 }
 
+/**
+ * Use annotations {@link Integration} {@link Unit} both together instead.
+ */
+@Deprecated
 @Active(FunctionUnitProcessor)
 annotation FunctionBoard {
     // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
@@ -49,12 +118,20 @@ annotation FunctionBoard {
     OutputPort[] outputPorts = #[]
 }
 
+/**
+ * Use annotation {@link Port} together with  {@link Unit}.
+ */
+@Deprecated
 annotation InputPort {
     String name
     Class<?> type
     Class<?>[] typeArguments = #[]
 }
 
+/**
+ * Use annotation {@link Port} together with  {@link Unit}.
+ */
+@Deprecated
 annotation OutputPort {
     String name
     Class<?> type
@@ -63,7 +140,7 @@ annotation OutputPort {
 
 class FunctionUnitProcessor extends AbstractClassProcessor {
     
-    AnnotationReference mainAnnotation
+    AnnotationReference unitAnnotation
     AnnotationReference unitModifier
     
     Iterable<? extends AnnotationReference> inputPortAnnotations
@@ -99,26 +176,26 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
      * @return true if the processed class is annotated with @Integration @Unit
      */
     private def boolean isIntegrationUnit() {
-        return this.mainAnnotation.isFlowUnit && this.unitModifier.isIntegration
+        return this.unitAnnotation.isFlowUnit && this.unitModifier.isIntegration
     }
 
     /**
      * @return true if the processed class is annotated with @Operation @Unit
      */
     private def boolean isOperationUnit() {
-        return this.mainAnnotation.isFlowUnit && this.unitModifier.isOperation
+        return this.unitAnnotation.isFlowUnit && this.unitModifier.isOperation
     }
     
     override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
-        mainAnnotation = annotatedClass.annotations?.findFirst[ functionUnit || functionBoard || flowUnit ]
+        unitAnnotation = annotatedClass.annotations?.findFirst[ functionUnit || functionBoard || flowUnit ]
         unitModifier = annotatedClass.annotations?.findFirst[ operation || integration ]
 
-        inputPortAnnotationArgument = mainAnnotation?.getValue("inputPorts")
+        inputPortAnnotationArgument = unitAnnotation?.getValue("inputPorts")
         if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
             inputPortAnnotations = inputPortAnnotationArgument as AnnotationReference[]
             doubledInputAnnotations = inputPortAnnotations.doubledAnnotations
             
-            if (doubledInputAnnotations.empty && (mainAnnotation.isFunctionUnit || operationUnit))
+            if (doubledInputAnnotations.empty && (unitAnnotation.isFunctionUnit || operationUnit))
                 inputPortAnnotations.forEach[ inputPortAnnotation |
                     context.registerInterface(
                         getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
@@ -126,7 +203,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ]
         }
         
-        outputPortAnnotationArgument = mainAnnotation?.getValue("outputPorts")
+        outputPortAnnotationArgument = unitAnnotation?.getValue("outputPorts")
         if (outputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
             outputPortAnnotations = outputPortAnnotationArgument  as AnnotationReference[]
             doubledOutputAnnotations = outputPortAnnotations.doubledAnnotations
@@ -255,7 +332,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         if (outputPortAnnotations.empty)
             annotatedClass.addWarning("no output port defined")
             
-        if ((mainAnnotation.isFunctionBoard || integrationUnit) && 
+        if ((unitAnnotation.isFunctionBoard || integrationUnit) && 
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].size > 0)
         {
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].forEach[
@@ -293,6 +370,9 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             contextError = true            
         }
         
+        if (unitModifier == null && unitAnnotation.isFlowUnit) {
+            annotatedClass.addError("modifier @Operation or @Integration required")
+        }
         return contextError
     }
 
@@ -382,7 +462,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                               «annotatedClass.simpleName».this.forwardIntegrationError(it);
                             }
                           };
-                          «IF (mainAnnotation.isFunctionBoard || integrationUnit)»
+                          «IF (unitAnnotation.isFunctionBoard || integrationUnit)»
                           de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function_1);
                           «ELSE»
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
@@ -410,7 +490,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ''']
             ])
 
-            if (mainAnnotation.isFunctionUnit || operationUnit) {
+            if (unitAnnotation.isFunctionUnit || operationUnit) {
                 // add the interface to the list of implemented interfaces
                 val interfaceType = findInterface(inputPortInterfaceName)
                 annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[interfaceType.newTypeReference]
