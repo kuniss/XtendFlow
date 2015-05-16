@@ -1,8 +1,7 @@
 package de.grammarcraft.xtend.annotatedflow
 
-import de.grammarcraft.xtend.flow.annotations.InputPort
 import de.grammarcraft.xtend.flow.annotations.Integration
-import de.grammarcraft.xtend.flow.annotations.OutputPort
+import de.grammarcraft.xtend.flow.annotations.Port
 import de.grammarcraft.xtend.flow.annotations.Unit
 
 /**
@@ -12,11 +11,11 @@ import de.grammarcraft.xtend.flow.annotations.Unit
  */
 @Integration @Unit(
     inputPorts = #[
-        @InputPort(name="input", type=String)
+        @Port(name="input", type=String)
     ],
     outputPorts = #[
-        @OutputPort(name="lower", type=String),
-        @OutputPort(name="upper", type=String)
+        @Port(name="lower", type=String),
+        @Port(name="upper", type=String)
     ]
 )
 class Normalize {

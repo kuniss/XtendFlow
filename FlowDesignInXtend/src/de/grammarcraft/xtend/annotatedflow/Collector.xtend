@@ -1,24 +1,24 @@
 package de.grammarcraft.xtend.annotatedflow
 
-import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-import java.util.List
+import de.grammarcraft.xtend.flow.annotations.Operation
+import de.grammarcraft.xtend.flow.annotations.Port
+import de.grammarcraft.xtend.flow.annotations.Unit
 import java.util.ArrayList
-import de.grammarcraft.xtend.flow.annotations.InputPort
-import de.grammarcraft.xtend.flow.annotations.OutputPort
+import java.util.List
 
 /**
  * Collects the input arriving over ports 'lower' and 'upper' 
  * by concatenating them and forwards the concatenation result
  * to port 'output'.
  */
-@FunctionUnit(
+@Operation @Unit(
     inputPorts = #[
-        @InputPort(name="lower", type=String),
-        @InputPort(name="upper", type=String)
+        @Port(name="lower", type=String),
+        @Port(name="upper", type=String)
     ],
     outputPorts = #[
-        @OutputPort(name="output", type=String),
-        @OutputPort(name="error", type=String)
+        @Port(name="output", type=String),
+        @Port(name="error", type=String)
     ]
 )
 class Collector {
