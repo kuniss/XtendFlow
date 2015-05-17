@@ -24,6 +24,7 @@ import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.eclipse.xtext.xbase.lib.Functions.Function0
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1
+import org.eclipse.xtend.lib.annotations.Data
 
 /**
  * Represents an Function Unit in the sense of the Flow Design paradigm.
@@ -138,76 +139,106 @@ annotation OutputPort {
     Class<?>[] typeArguments = #[]
 }
 
-class FunctionUnitProcessor extends AbstractClassProcessor {
+@Data class FlowAnnotationSignature {
+    val AnnotationReference unitAnnotation
+    val AnnotationReference unitModifier
     
-    AnnotationReference unitAnnotation
-    AnnotationReference unitModifier
+    val Iterable<? extends AnnotationReference> inputPortAnnotations
+    val Iterable<? extends AnnotationReference> outputPortAnnotations
     
-    Iterable<? extends AnnotationReference> inputPortAnnotations
-    Iterable<? extends AnnotationReference> outputPortAnnotations
-    Iterable<? extends AnnotationReference> doubledInputAnnotations
-    Iterable<? extends AnnotationReference> doubledOutputAnnotations
+    val Object inputPortAnnotationArgument
+    val Object outputPortAnnotationArgument
     
-    Object inputPortAnnotationArgument
-    Object outputPortAnnotationArgument
+    new(ClassDeclaration annotatedClass) {
+        unitAnnotation = annotatedClass.annotations?.findFirst[ 
+            functionUnitAnnotation || functionBoardAnnotation || flowUnitAnnotation
+        ]
+        unitModifier = annotatedClass.annotations?.findFirst[ operationAnnotation || integrationAnnotation ]
+        inputPortAnnotationArgument = unitAnnotation?.getValue("inputPorts")
+        if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[]))
+            inputPortAnnotations = inputPortAnnotationArgument as AnnotationReference[]
+        else
+            inputPortAnnotations = #[]
+        outputPortAnnotationArgument = unitAnnotation?.getValue("outputPorts")
+        if (outputPortAnnotationArgument?.class == typeof(AnnotationReference[]))
+            outputPortAnnotations = outputPortAnnotationArgument as AnnotationReference[]
+        else
+            outputPortAnnotations = #[]
+    }
     
-        
-    private def static boolean isFunctionUnit(AnnotationReference annotation) {
+    private def static boolean isFunctionUnitAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == FunctionUnit.name
     }
 
-    private def static boolean isFunctionBoard(AnnotationReference annotation) {
+    private def static boolean isFunctionBoardAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == FunctionBoard.name
     }
     
-    private def static boolean isFlowUnit(AnnotationReference annotation) {
+    private def static boolean isFlowUnitAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == Unit.name
     }
     
-    private def static boolean isOperation(AnnotationReference annotation) {
+    private def static boolean isOperationAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == Operation.name
     }
 
-    private def static boolean isIntegration(AnnotationReference annotation) {
+    private def static boolean isIntegrationAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == Integration.name
+    }
+    
+    def boolean isFunctionUnit() { 
+        return this.unitAnnotation.isFunctionUnitAnnotation
+    }
+    
+    def boolean isFunctionBoard() {
+        return this.unitAnnotation.isFunctionBoardAnnotation
+    }
+    
+    def boolean isFlowUnit() {
+        return this.unitAnnotation.isFlowUnitAnnotation
+    }
+    
+    def boolean hasOperationModifier() {
+        return this.unitModifier.isOperationAnnotation
+    }
+
+    def boolean hasIntegrationModifier() {
+        return this.unitModifier.isIntegrationAnnotation
     }
     
     /**
      * @return true if the processed class is annotated with @Integration @Unit
      */
-    private def boolean isIntegrationUnit() {
-        return this.unitAnnotation.isFlowUnit && this.unitModifier.isIntegration
+    def boolean isIntegrationUnit() {
+        return isFlowUnit && hasIntegrationModifier
     }
 
     /**
      * @return true if the processed class is annotated with @Operation @Unit
      */
-    private def boolean isOperationUnit() {
-        return this.unitAnnotation.isFlowUnit && this.unitModifier.isOperation
+    def boolean isOperationUnit() {
+        return isFlowUnit && hasOperationModifier
     }
     
-    override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
-        unitAnnotation = annotatedClass.annotations?.findFirst[ functionUnit || functionBoard || flowUnit ]
-        unitModifier = annotatedClass.annotations?.findFirst[ operation || integration ]
+}
 
-        inputPortAnnotationArgument = unitAnnotation?.getValue("inputPorts")
-        if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
-            inputPortAnnotations = inputPortAnnotationArgument as AnnotationReference[]
-            doubledInputAnnotations = inputPortAnnotations.doubledAnnotations
-            
-            if (doubledInputAnnotations.empty && (unitAnnotation.isFunctionUnit || operationUnit))
-                inputPortAnnotations.forEach[ inputPortAnnotation |
-                    context.registerInterface(
-                        getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
-                    )
-                ]
+class FunctionUnitProcessor extends AbstractClassProcessor {
+    
+    
+    override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
+        val flowAnnotation = new FlowAnnotationSignature(annotatedClass)
+
+        if ( flowAnnotation.inputPortAnnotations.doubledAnnotations.empty &&
+            (flowAnnotation.isFunctionUnit || flowAnnotation.isOperationUnit)
+        )
+        {
+            flowAnnotation.inputPortAnnotations.forEach[ inputPortAnnotation |
+                context.registerInterface(
+                    getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
+                )
+            ]
         }
         
-        outputPortAnnotationArgument = unitAnnotation?.getValue("outputPorts")
-        if (outputPortAnnotationArgument?.class == typeof(AnnotationReference[])) {
-            outputPortAnnotations = outputPortAnnotationArgument  as AnnotationReference[]
-            doubledOutputAnnotations = outputPortAnnotations.doubledAnnotations
-        }
     }
     
     private static def String getInputPortInterfaceName(ClassDeclaration annotatedClass, AnnotationReference inputPortAnnotation) {
@@ -236,16 +267,17 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     
     
     override doTransform(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+        val flowAnnotation = new FlowAnnotationSignature(annotatedClass)
         var boolean hasContextErrors = false
 
-        hasContextErrors = checkForContextErrors(context, annotatedClass)
+        hasContextErrors = checkForContextErrors(context, annotatedClass, flowAnnotation)
         
         if (hasContextErrors) {
             annotatedClass.addWarning("due to port annotation errors, no code can be generated")
             return            
         }
             
-        checkForContextWarnings(context, annotatedClass)
+        checkForContextWarnings(context, annotatedClass, flowAnnotation)
         
         annotatedClass.final = true
         
@@ -254,24 +286,24 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             «if (!(annotatedClass.docComment == null || annotatedClass.docComment.empty)) '<br><br>'»
             Implements a function unit as defined by Flow Design paradigm.<br>
             It consumes input messages over the input ports<br>
-                «inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
+                «flowAnnotation.inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
             And issues computation results over the output ports<br>
-                «outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
+                «flowAnnotation.outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
         '''
         
         addClassCommentToConstructors(annotatedClass, context)
         
-        addInterfaces(annotatedClass, context)
+        addInterfaces(annotatedClass, flowAnnotation, context)
         
         addNamingStuff(annotatedClass, context)
         
         addIntegrationErrorPort(annotatedClass, context)
                     
-        addInputPorts(annotatedClass, context) 
+        addInputPorts(annotatedClass, flowAnnotation, context) 
         
-        addOutputPorts(annotatedClass, context)
+        addOutputPorts(annotatedClass, flowAnnotation, context)
         
-        addFlowOperators(annotatedClass, context)
+        addFlowOperators(annotatedClass, flowAnnotation, context)
     }
     
     /**
@@ -294,17 +326,17 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
      * Adds "implements FunctionUnitWithOnlyOneInputPort<?>" if only one input port defined.
      * Add "implements FunctionUnitWithOnlyOneOutputPort<?>" if only one output port defined
      */
-    def private addInterfaces(MutableClassDeclaration annotatedClass, extension TransformationContext context) 
+    def private addInterfaces(MutableClassDeclaration annotatedClass, FlowAnnotationSignature flowAnnotation, extension TransformationContext context) 
     {
         val List<TypeReference> interfacesToBeAdded = new ArrayList
     
         interfacesToBeAdded.add(IFunctionUnit.newTypeReference)    
         
-        if (inputPortAnnotations.size == 1 || outputPortAnnotations.size == 1) 
+        if (flowAnnotation.inputPortAnnotations.size == 1 || flowAnnotation.outputPortAnnotations.size == 1) 
         {
         
-            if (inputPortAnnotations.size == 1) {
-                val inputPortAnnotation = inputPortAnnotations.head
+            if (flowAnnotation.inputPortAnnotations.size == 1) {
+                val inputPortAnnotation = flowAnnotation.inputPortAnnotations.head
                 interfacesToBeAdded.add( 
                     FunctionUnitWithOnlyOneInputPort.newTypeReference(
                         inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
@@ -312,8 +344,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 )
             }
             
-            if (outputPortAnnotations.size == 1) {
-                val outputPortAnnotation = outputPortAnnotations.head
+            if (flowAnnotation.outputPortAnnotations.size == 1) {
+                val outputPortAnnotation = flowAnnotation.outputPortAnnotations.head
                 interfacesToBeAdded.add( 
                     FunctionUnitWithOnlyOneOutputPort.newTypeReference(
                         outputPortAnnotation.portType.type.newTypeReference(outputPortAnnotation.portTypeParameters)
@@ -325,14 +357,16 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     }
     
     
-    private def checkForContextWarnings(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
-        if (inputPortAnnotations.empty)
+    private def checkForContextWarnings(extension TransformationContext context, 
+        MutableClassDeclaration annotatedClass, FlowAnnotationSignature flowAnnotation
+    ){
+        if (flowAnnotation.inputPortAnnotations.empty)
             annotatedClass.addWarning("no input port defined")
         
-        if (outputPortAnnotations.empty)
+        if (flowAnnotation.outputPortAnnotations.empty)
             annotatedClass.addWarning("no output port defined")
             
-        if ((unitAnnotation.isFunctionBoard || integrationUnit) && 
+        if ((flowAnnotation.isFunctionBoard || flowAnnotation.isIntegrationUnit) && 
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].size > 0)
         {
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].forEach[
@@ -341,21 +375,24 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         }
     }
     
-    private def checkForContextErrors(extension TransformationContext context, MutableClassDeclaration annotatedClass) {
+    private def checkForContextErrors(extension TransformationContext context, 
+        MutableClassDeclaration annotatedClass, FlowAnnotationSignature flowAnnotation
+    ) {
         var boolean contextError = false
         
-        if (inputPortAnnotationArgument?.class != typeof(AnnotationReference[])) {
+        if (flowAnnotation.inputPortAnnotationArgument?.class != typeof(AnnotationReference[])) {
             annotatedClass.addError("array of input port annotations expected")
             contextError = true            
         }
         
-        if (outputPortAnnotationArgument?.class != typeof(AnnotationReference[])) {
+        if (flowAnnotation.outputPortAnnotationArgument?.class != typeof(AnnotationReference[])) {
             annotatedClass.addError("array of output port annotations expected")
             contextError = true            
         }
         
         if (contextError) return true
         
+        val doubledInputAnnotations = flowAnnotation.inputPortAnnotations.doubledAnnotations
         if (!doubledInputAnnotations.empty) {
             doubledInputAnnotations.forEach[
                 annotatedClass.addError('''input port "«portName»" is declared twice''')
@@ -363,6 +400,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             contextError = true            
         }
 
+        val doubledOutputAnnotations = flowAnnotation.outputPortAnnotations.doubledAnnotations
         if (!doubledOutputAnnotations.empty) {
             doubledOutputAnnotations.forEach[
                 annotatedClass.addError('''output port "«portName»" is declared twice''')
@@ -370,7 +408,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             contextError = true            
         }
         
-        if (unitModifier == null && unitAnnotation.isFlowUnit) {
+        if (flowAnnotation.unitModifier == null && flowAnnotation.isFlowUnit) {
             annotatedClass.addError("modifier @Operation or @Integration required")
         }
         return contextError
@@ -439,8 +477,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     }
     
 
-    private def addInputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-        inputPortAnnotations.forEach[ inputPortAnnotation |
+    private def addInputPorts(MutableClassDeclaration annotatedClass, FlowAnnotationSignature flowAnnotation, extension TransformationContext context) {
+        flowAnnotation.inputPortAnnotations.forEach[ inputPortAnnotation |
                 
             val portName = inputPortAnnotation.portName
             val inputPortInterfaceName = getInputPortInterfaceName(annotatedClass, inputPortAnnotation)
@@ -462,7 +500,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                               «annotatedClass.simpleName».this.forwardIntegrationError(it);
                             }
                           };
-                          «IF (unitAnnotation.isFunctionBoard || integrationUnit)»
+                          «IF (flowAnnotation.isFunctionBoard || flowAnnotation.isIntegrationUnit)»
                           de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function_1);
                           «ELSE»
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<«msgType»>() {
@@ -490,7 +528,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 ''']
             ])
 
-            if (unitAnnotation.isFunctionUnit || operationUnit) {
+            if (flowAnnotation.isFunctionUnit || flowAnnotation.isOperationUnit) {
                 // add the interface to the list of implemented interfaces
                 val interfaceType = findInterface(inputPortInterfaceName)
                 annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[interfaceType.newTypeReference]
@@ -507,8 +545,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             
     }
     
-    private def addOutputPorts(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-        outputPortAnnotations.forEach[ outputPortAnnotation |
+    private def addOutputPorts(MutableClassDeclaration annotatedClass, FlowAnnotationSignature flowAnnotation, extension TransformationContext context) {
+        flowAnnotation.outputPortAnnotations.forEach[ outputPortAnnotation |
             val portName = outputPortAnnotation.portName
             val msgType = outputPortAnnotation.portType.type.newTypeReference(outputPortAnnotation.portTypeParameters)
                         
@@ -551,12 +589,12 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         ]
     }
     
-    def private addFlowOperators(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
+    def private addFlowOperators(MutableClassDeclaration annotatedClass, FlowAnnotationSignature flowAnnotation, extension TransformationContext context) {
 
-        if (inputPortAnnotations.size == 1) 
+        if (flowAnnotation.inputPortAnnotations.size == 1) 
         {
-            val portName = inputPortAnnotations.head.portName
-            val msgType = inputPortAnnotations.head.portType.type.newTypeReference(inputPortAnnotations.head.portTypeParameters)
+            val portName = flowAnnotation.inputPortAnnotations.head.portName
+            val msgType = flowAnnotation.inputPortAnnotations.head.portType.type.newTypeReference(flowAnnotation.inputPortAnnotations.head.portTypeParameters)
             
             annotatedClass.addMethod('theOneAndOnlyInputPort', [
                 final = true
@@ -602,10 +640,10 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
         }
         
         // add output connection operators -> if it is an one output port only function unit
-        if (outputPortAnnotations.size == 1) 
+        if (flowAnnotation.outputPortAnnotations.size == 1) 
         {
-            val portName = outputPortAnnotations.head.portName
-            val msgType = outputPortAnnotations.head.portType.type.newTypeReference(outputPortAnnotations.head.portTypeParameters)
+            val portName = flowAnnotation.outputPortAnnotations.head.portName
+            val msgType = flowAnnotation.outputPortAnnotations.head.portType.type.newTypeReference(flowAnnotation.outputPortAnnotations.head.portTypeParameters)
             
             annotatedClass.addMethod('operator_mappedTo', [
                 final = true

@@ -474,6 +474,81 @@ class FunctionUnitTest {
         ]
     }
     
+        @Test def void test_two_subsequent_function_units_in_the_same_compilation_unit() {
+        val inputPortTypeName = 'String'
+        val outputPortTypeName = 'String'
+        val className = 'MyFunctionUnit1'
+        val inputPortName = 'input1'
+        val outputPortName = 'output1'
+        val className2 = 'MyFunctionUnit2'
+        val inputPortName2 = 'input2'
+        val outputPortName2 = 'output2'
+        '''
+            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
+            import de.grammarcraft.xtend.flow.annotations.OutputPort
+            import de.grammarcraft.xtend.flow.annotations.InputPort
+        
+            @FunctionUnit(
+                inputPorts = #[
+                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                ],
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                ]
+            )
+            class «className» {
+            
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName» <= msg.toUpperCase;
+                }
+                
+            }
+            
+            @FunctionUnit(
+                inputPorts = #[
+                    @InputPort(name="«inputPortName2»", type=«inputPortTypeName»)
+                ],
+                outputPorts = #[
+                    @OutputPort(name="«outputPortName2»", type=«outputPortTypeName»)
+                ]
+            )
+            class «className2» {
+            
+                override «inputPortName2.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName2» <= msg.toUpperCase;
+                }
+                
+            }
+        '''.compile [
+            val extension ctx = transformationContext
+
+            val clazz = findClass(className)
+            val inputPortType = String.newTypeReference
+            val outputPortType = String.newTypeReference
+            
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
+
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
+            
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
+
+
+            val clazz2 = findClass(className2)
+            assertInputPortGenerated(inputPortName2, inputPortType, className2, clazz2, ctx)            
+            assertOutputPortGenerated(outputPortName2, outputPortType, className2, clazz2, ctx)
+            
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className2, inputPortType, clazz2, ctx)
+            assertLessEqualsThanOperatorsGenerated(className2, inputPortType, clazz2, ctx)
+            assertMappedToOperatorGenerated(className2, outputPortType, clazz2, ctx)
+
+        ]
+    }
+    
+    
     private def assertInputPortInterfaceGenerated(String inputPortName, TypeReference inputPortType, String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
     {
