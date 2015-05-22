@@ -16,12 +16,12 @@ class OperationTest {
     
     private def static String appendPort(String msg, String port) '''«msg»-«port»'''
 
-    @FunctionUnit(
+    @Operation @Unit(
         inputPorts = #[
-            @InputPort(name="in", type=String)
+            @Port(name="in", type=String)
         ],
         outputPorts = #[
-            @OutputPort(name="out", type=String)
+            @Port(name="out", type=String)
         ]
     )
     static class A {
@@ -32,12 +32,12 @@ class OperationTest {
         }
     }
 
-    @FunctionUnit(
+    @Operation @Unit(
         inputPorts = #[
-            @InputPort(name="in", type=String)
+            @Port(name="in", type=String)
         ],
         outputPorts = #[
-            @OutputPort(name="out", type=String)
+            @Port(name="out", type=String)
         ]
     )
     static class B {
@@ -138,12 +138,12 @@ class OperationTest {
     }
 
 
-    @FunctionUnit(
+    @Operation @Unit(
         inputPorts = #[
-            @InputPort(name="in", type=String)
+            @Port(name="in", type=String)
         ],
         outputPorts = #[
-            @OutputPort(name="out", type=String)
+            @Port(name="out", type=String)
         ]
     )
     static class I1 {
@@ -167,12 +167,12 @@ class OperationTest {
         I1.in <= 'start'
     }
 
-    @FunctionUnit(
+    @Operation @Unit(
         inputPorts = #[
-            @InputPort(name="in", type=String)
+            @Port(name="in", type=String)
         ],
         outputPorts = #[
-            @OutputPort(name="out", type=String)
+            @Port(name="out", type=String)
         ]
     )
     static class I2 {
@@ -195,12 +195,12 @@ class OperationTest {
         I2.in <= 'start'
     }
 
-    @FunctionUnit(
+    @Operation @Unit(
         inputPorts = #[
-            @InputPort(name="in", type=String)
+            @Port(name="in", type=String)
         ],
         outputPorts = #[
-            @OutputPort(name="out", type=String)
+            @Port(name="out", type=String)
         ]
     )
     static class C {
@@ -231,11 +231,11 @@ class OperationTest {
            }
     }
     
-    @FunctionBoard(
-        inputPorts = #[@InputPort(name="in", type=String)],
+    @Integration @Unit(
+        inputPorts = #[@Port(name="in", type=String)],
         outputPorts = #[
-            @OutputPort(name="outA", type=String),
-            @OutputPort(name="outB", type=String)
+            @Port(name="outA", type=String),
+            @Port(name="outB", type=String)
         ]
     )
     static class FB {

@@ -22,7 +22,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 class FunctionUnitTest {
 
-    extension XtendCompilerTester compilerTester = XtendCompilerTester.newXtendCompilerTester(FunctionUnit)
+    extension XtendCompilerTester compilerTester = XtendCompilerTester.newXtendCompilerTester(Unit)
     
     private def String interfaceName(String className, String inputPortName) '''«className»_InputPort_«inputPortName»'''
 
@@ -35,16 +35,16 @@ class FunctionUnitTest {
         val outputPortName = 'output'
         val outputPortTypeName = 'String'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
@@ -81,16 +81,16 @@ class FunctionUnitTest {
         val outputPortName = 'ausgabe'
         val outputPortTypeName = 'String'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
@@ -128,16 +128,16 @@ class FunctionUnitTest {
         val outputPortName = 'output'
         val outputPortTypeName = 'Integer'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
@@ -177,17 +177,17 @@ class FunctionUnitTest {
         val outputPortName = 'output'
         val outputPortTypeName = 'String'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»),
-                    @InputPort(name="«inputPort2Name»", type=«inputPort2TypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»),
+                    @Port(name="«inputPort2Name»", type=«inputPort2TypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
@@ -234,17 +234,17 @@ class FunctionUnitTest {
         val output2PortName = 'output2'
         val output2PortTypeName = 'String'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»),
-                    @OutputPort(name="«output2PortName»", type=«output2PortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»),
+                    @Port(name="«output2PortName»", type=«output2PortTypeName»)
                 ]
             )
             class «className» {
@@ -288,18 +288,18 @@ class FunctionUnitTest {
         val outputPortTypeName = 'Set'
         val outputPortTypeParameters = 'Integer' 
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
             import java.util.Set
             import java.util.Map
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName», typeArguments=#[«inputPortTypeParameters»])
+                    @Port(name="«inputPortName»", type=«inputPortTypeName», typeArguments=#[«inputPortTypeParameters»])
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName», typeArguments=#[«outputPortTypeParameters»])
+                    @Port(name="«outputPortName»", type=«outputPortTypeName», typeArguments=#[«outputPortTypeParameters»])
                 ]
             )
             class «className» {
@@ -337,14 +337,14 @@ class FunctionUnitTest {
         val outputPortName = 'output'
         val outputPortTypeName = 'String'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.FunctionBoard
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Integration
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
-                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
-                outputPorts = #[@OutputPort(name="out", type=«outputPortTypeName»)]
+            @Operation @Unit(
+                inputPorts = #[@Port(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@Port(name="out", type=«outputPortTypeName»)]
             )
             class A {
                 override processIn(«inputPortTypeName» msg) {
@@ -352,9 +352,9 @@ class FunctionUnitTest {
                 }
             }
 
-            @FunctionUnit(
-                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
-                outputPorts = #[@OutputPort(name="out", type=«outputPortTypeName»)]
+            @Operation @Unit(
+                inputPorts = #[@Port(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@Port(name="out", type=«outputPortTypeName»)]
             )
             class B {
                 override processIn(«inputPortTypeName» msg) {
@@ -362,12 +362,12 @@ class FunctionUnitTest {
                 }
             }
 
-            @FunctionBoard(
+            @Integration @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
@@ -409,14 +409,14 @@ class FunctionUnitTest {
         val outputPort2Name = 'output1'
         val outputPort2TypeName = 'String'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
+            import de.grammarcraft.xtend.flow.annotations.Unit
             import de.grammarcraft.xtend.flow.annotations.FunctionBoard
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
-                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
-                outputPorts = #[@OutputPort(name="out", type=«outputPort1TypeName»)]
+            @Operation @Unit(
+                inputPorts = #[@Port(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@Port(name="out", type=«outputPort1TypeName»)]
             )
             class A {
                 override processIn(«inputPortTypeName» msg) {
@@ -424,9 +424,9 @@ class FunctionUnitTest {
                 }
             }
 
-            @FunctionUnit(
-                inputPorts = #[@InputPort(name="in", type=«inputPortTypeName»)],
-                outputPorts = #[@OutputPort(name="out", type=«outputPort1TypeName»)]
+            @Operation @Unit(
+                inputPorts = #[@Port(name="in", type=«inputPortTypeName»)],
+                outputPorts = #[@Port(name="out", type=«outputPort1TypeName»)]
             )
             class B {
                 override processIn(«inputPortTypeName» msg) {
@@ -434,12 +434,12 @@ class FunctionUnitTest {
                 }
             }
 
-            @FunctionBoard(
+            @Integration @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPort1Name»", type=«outputPort1TypeName»)
+                    @Port(name="«outputPort1Name»", type=«outputPort1TypeName»)
                 ]
             )
             class «className» {
@@ -484,16 +484,16 @@ class FunctionUnitTest {
         val inputPortName2 = 'input2'
         val outputPortName2 = 'output2'
         '''
-            import de.grammarcraft.xtend.flow.annotations.FunctionUnit
-            import de.grammarcraft.xtend.flow.annotations.OutputPort
-            import de.grammarcraft.xtend.flow.annotations.InputPort
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.annotations.Operation
         
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
                 ]
             )
             class «className» {
@@ -504,12 +504,12 @@ class FunctionUnitTest {
                 
             }
             
-            @FunctionUnit(
+            @Operation @Unit(
                 inputPorts = #[
-                    @InputPort(name="«inputPortName2»", type=«inputPortTypeName»)
+                    @Port(name="«inputPortName2»", type=«inputPortTypeName»)
                 ],
                 outputPorts = #[
-                    @OutputPort(name="«outputPortName2»", type=«outputPortTypeName»)
+                    @Port(name="«outputPortName2»", type=«outputPortTypeName»)
                 ]
             )
             class «className2» {
