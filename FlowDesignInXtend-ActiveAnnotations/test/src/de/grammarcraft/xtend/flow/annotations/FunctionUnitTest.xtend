@@ -9,6 +9,7 @@
 package de.grammarcraft.xtend.flow.annotations
 
 import de.grammarcraft.xtend.flow.FunctionUnitWithOnlyOneInputPort
+import de.grammarcraft.xtend.flow.data.None
 import java.util.Map
 import java.util.Set
 import org.eclipse.xtend.core.compiler.batch.XtendCompilerTester
@@ -548,6 +549,50 @@ class FunctionUnitTest {
         ]
     }
     
+    
+    @Test def void test_implicit_input_port() {
+        val className = 'MyFunctionUnit'
+        val inputPortName = 'start'
+        val inputPortTypeName = 'None'
+        val outputPortName = 'output'
+        val outputPortTypeName = 'String'
+        '''
+            import de.grammarcraft.xtend.flow.annotations.Unit
+            import de.grammarcraft.xtend.flow.annotations.Port
+            import de.grammarcraft.xtend.flow.data.None
+            import de.grammarcraft.xtend.flow.annotations.Operation
+        
+            @Operation @Unit(
+                outputPorts = #[
+                    @Port(name="«outputPortName»", type=«outputPortTypeName»)
+                ]
+            )
+            class «className» {
+            
+                override «inputPortName.processMethodName»(«inputPortTypeName» msg) {
+                    «outputPortName» <= msg.toUpperCase;
+                }
+                
+            }
+        '''.compile [
+            val extension ctx = transformationContext
+
+            val clazz = findClass(className)
+            val inputPortType = None.newTypeReference
+            val outputPortType = String.newTypeReference
+            
+            assertEquals(inputPortTypeName, inputPortType.toString)
+            assertEquals(outputPortTypeName, outputPortType.toString)
+
+            assertInputPortGenerated(inputPortName, inputPortType, className, clazz, ctx)            
+            assertOutputPortGenerated(outputPortName, outputPortType, className, clazz, ctx)
+            
+            assertTheOneAndOnlyInputPortCanonicalMethodGenerated(className, inputPortType, clazz, ctx)
+            assertLessEqualsThanOperatorsGenerated(className, inputPortType, clazz, ctx)
+            assertMappedToOperatorGenerated(className, outputPortType, clazz, ctx)
+
+        ]
+    }
     
     private def assertInputPortInterfaceGenerated(String inputPortName, TypeReference inputPortType, String className, 
         MutableClassDeclaration clazz, extension TransformationContext ctx) 
