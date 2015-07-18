@@ -168,6 +168,45 @@ Unfortunately, no error is shown by the Xtend compiler if the wiring operator is
 than one input port or output port without using full qualified port names as then the operator is treated as Xtend's
 pairing operator.
 
+## Implicit Input Ports
+
+Under circumstances a flow needs to be started by an event without any data delivering; e.g. on an intial start of a program. In this case the definition of the inpurt port may be omitted. The framework will create an implicit input port of type `de.grammarcraft.xtend.flow.data.None`. 
+
+Let's assume a function unit with no input port declared. It reads user input from the console - a typical use case for starting a flow without explicit input data delivery:
+```
+@Operation @Unit(
+    outputPorts = #[
+        @Port(name="readNumber", type=String)
+    ]
+)
+class ReadNumberToConvert {..}
+```
+
+The flow trough this function unit may be started by forwarding the predefined constant value `None` to it:
+```
+class Program 
+{
+    def static void main(String[] args) 
+    {
+        ReadNumberToConvert entry_point
+        ...
+	    entry_point <= None
+	}
+}
+```
+
+For this example the following method for processing the data less input event have to be overridden:
+```
+class ReadNumberToConvert {
+
+    override process$start(None msg) {
+        output <= this.inputProvider.read_number_to_convert()
+    }
+    
+}
+```
+
+
 ## Error Handling
 
 
@@ -274,3 +313,7 @@ for [Xtend compiling](http://plugins.gradle.org/plugin/org.xtend.xtend)
 and [for releasing to Bintray and Maven Central](http://plugins.gradle.org/plugin/com.github.oehme.sobula.bintray-release).
 
 The build is running on [Travis CI](https://travis-ci.org/kuniss/XtendFlow).
+
+## Example Implementations
+
+Example implentations applying this library may be found on GitHub in the repository [XtendFlow-Examples](https://github.com/kuniss/XtendFlow-Examples).
