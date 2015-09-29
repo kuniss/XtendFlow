@@ -168,9 +168,10 @@ Unfortunately, no error is shown by the Xtend compiler if the wiring operator is
 than one input port or output port without using full qualified port names as then the operator is treated as Xtend's
 pairing operator.
 
+
 ## Implicit Input Ports
 
-Under circumstances a flow needs to be started by an event without any data delivering; e.g. on an intial start of a program. In this case the definition of the inpurt port may be omitted. The framework will create an implicit input port of type `de.grammarcraft.xtend.flow.data.None`. 
+Under circumstances a flow needs to be started by an event without any data delivering; e.g. on an initial start of a program. In this case the definition of the input port may be omitted. The framework will create an implicit input port of type `de.grammarcraft.xtend.flow.data.None`. 
 
 Let's assume a function unit with no input port declared. It reads user input from the console - a typical use case for starting a flow without explicit input data delivery:
 ```
@@ -190,8 +191,8 @@ class Program
     {
         ReadNumberToConvert entry_point
         ...
-	    entry_point <= None
-	}
+        entry_point <= None
+    }
 }
 ```
 
@@ -205,6 +206,7 @@ class ReadNumberToConvert {
     
 }
 ```
+
 
 
 ## Error Handling
