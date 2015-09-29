@@ -294,10 +294,21 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             «annotatedClass.docComment»
             «if (!(annotatedClass.docComment == null || annotatedClass.docComment.empty)) '<br><br>'»
             Implements a function unit as defined by Flow Design paradigm.<br>
-            It consumes input messages over the input ports<br>
-                «flowAnnotation.inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
-            And issues computation results over the output ports<br>
-                «flowAnnotation.outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n')»<br>
+            «IF flowAnnotation.inputPortAnnotations.empty»
+                It may be started triggering the implicit input port "«defaultInputPortName»" sending 'None' to it 
+                (the port is implicit as no one specified explicitely).
+            «ELSE»
+                It consumes input messages over the input ports<br>
+                «flowAnnotation.inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>- \n')».
+            «ENDIF»
+            <br>
+            «IF flowAnnotation.outputPortAnnotations.empty»
+                And has no output ports (as no one has been specified).
+            «ELSE»
+                And issues computation results over the output ports.<br>
+                «flowAnnotation.outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n- ')».
+            «ENDIF»
+            <br>
         '''
         
         addClassCommentToConstructors(annotatedClass, context)
