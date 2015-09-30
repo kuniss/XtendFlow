@@ -299,14 +299,14 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 (the port is implicit as no one specified explicitely).
             «ELSE»
                 It consumes input messages over the input ports<br>
-                «flowAnnotation.inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>- \n')».
+                - «flowAnnotation.inputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>- \n')».
             «ENDIF»
             <br>
             «IF flowAnnotation.outputPortAnnotations.empty»
                 And has no output ports (as no one has been specified).
             «ELSE»
-                And issues computation results over the output ports.<br>
-                «flowAnnotation.outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n- ')».
+                And issues computation results over the output ports<br>
+                - «flowAnnotation.outputPortAnnotations.map['''"«portName»" of type "«portType»"'''].join('<br>\n- ')».
             «ENDIF»
             <br>
         '''
