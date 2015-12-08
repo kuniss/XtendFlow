@@ -98,7 +98,7 @@ output <= [
 ]
 ``` 
 
-## Operation Unit Annotation `@Integration`
+## Integration Unit Annotation `@Integration`
 
 While operation units are used for implementing the pieces of logic a system is composed of, the only reason of integration units following the IODA architecture approach is the integration of other function units, operation or integration units. Integration units are used to compose systems and parts of systems. 
 Nevertheless they are treated as function units as well, having input and output ports. Therefore input ports and output ports are declared in the same way.
