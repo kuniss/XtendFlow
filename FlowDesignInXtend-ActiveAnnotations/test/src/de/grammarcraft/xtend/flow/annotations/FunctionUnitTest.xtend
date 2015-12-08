@@ -23,7 +23,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 class FunctionUnitTest {
 
-    extension XtendCompilerTester compilerTester = XtendCompilerTester.newXtendCompilerTester(Unit)
+    extension XtendCompilerTester compilerTester = XtendCompilerTester.newXtendCompilerTester(Unit.classLoader)
     
     private def String interfaceName(String className, String inputPortName) '''«className»_InputPort_«inputPortName»'''
 

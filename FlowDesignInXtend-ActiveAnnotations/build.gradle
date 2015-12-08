@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.xtend.xtend' version '0.4.8'
-	id 'com.github.oehme.sobula.bintray-release' version '0.6.4'
+	id 'org.xtend.xtend' version '0.4.12'
+	id 'com.github.oehme.sobula.bintray-release' version '0.6.5'
 }
 
 group = "de.grammarcraft"
@@ -21,9 +21,9 @@ bintray.pkg.version.mavenCentralSync.user = "kuniss"
 repositories.jcenter()
 
 dependencies {
-  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.8.4'
+  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.9.0'
   testCompile 'junit:junit:4.12'
-  testCompile 'org.eclipse.xtend:org.eclipse.xtend.core:2.8.4'
+  testCompile 'org.eclipse.xtend:org.eclipse.xtend.core:2.9.0'
 }
 
 sourceSets {

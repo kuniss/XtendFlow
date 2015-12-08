@@ -1,12 +1,12 @@
 plugins {
 	id 'java'
-	id 'org.xtend.xtend' version '0.4.8'
+	id 'org.xtend.xtend' version '0.4.12'
 }
 
 repositories.jcenter()
 
 dependencies {
-  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.8.+'
+  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.9.+'
   compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.4.+'
   compile 'junit:junit:4.+' 
 }

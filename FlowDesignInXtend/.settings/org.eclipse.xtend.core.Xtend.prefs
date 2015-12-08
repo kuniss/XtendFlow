@@ -1,8 +1,10 @@
-#Tue Sep 29 16:07:33 CEST 2015
+#Tue Dec 08 23:02:32 CET 2015
 outlet.DEFAULT_OUTPUT.generatedAnnotationComment=
 //outlet.DEFAULT_OUTPUT.sourceFolder.src/test/java.directory=build/xtend-gen/test
 outlet.DEFAULT_OUTPUT.generateGeneratedAnnotation=false
 BuilderConfiguration.is_project_specific=true
+//outlet.DEFAULT_OUTPUT.sourceFolder.build/xtend-gen/main.directory=build/xtend-gen/main
+//outlet.DEFAULT_OUTPUT.sourceFolder.build/xtend-gen/test.directory=build/xtend-gen/test
 outlet.DEFAULT_OUTPUT.generateSuppressWarnings=true
 outlet.DEFAULT_OUTPUT.installDslAsPrimarySource=false
 outlet.DEFAULT_OUTPUT.userOutputPerSourceFolder=true
