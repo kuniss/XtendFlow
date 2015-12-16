@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.xtend.xtend' version '0.4.12'
-	id 'com.github.oehme.sobula.bintray-release' version '0.6.5'
+    id "org.xtext.xtend" version "1.0.0"
+	id 'com.github.oehme.sobula.bintray-release' version '0.6.6'
 }
 
 group = "de.grammarcraft"
