@@ -98,48 +98,6 @@ annotation Port {
     Class<?>[] typeArguments = #[]
 }
 
-/**
- * Use annotations {@link Operation} {@link Unit} both together.
- */
-@Deprecated
-@Active(FunctionUnitProcessor)
-annotation FunctionUnit {
-    // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
-    InputPort[] inputPorts = #[]
-    OutputPort[] outputPorts = #[]
-}
-
-/**
- * Use annotations {@link Integration} {@link Unit} both together instead.
- */
-@Deprecated
-@Active(FunctionUnitProcessor)
-annotation FunctionBoard {
-    // Java <= 7 does not supported repeated annotations of the same type; therefore they have to be grouped into an array
-    InputPort[] inputPorts = #[]
-    OutputPort[] outputPorts = #[]
-}
-
-/**
- * Use annotation {@link Port} together with  {@link Unit}.
- */
-@Deprecated
-annotation InputPort {
-    String name
-    Class<?> type
-    Class<?>[] typeArguments = #[]
-}
-
-/**
- * Use annotation {@link Port} together with  {@link Unit}.
- */
-@Deprecated
-annotation OutputPort {
-    String name
-    Class<?> type
-    Class<?>[] typeArguments = #[]
-}
-
 @Data class FlowAnnotationSignature {
     val AnnotationReference unitAnnotation
     val AnnotationReference unitModifier
@@ -151,9 +109,7 @@ annotation OutputPort {
     val Object outputPortAnnotationArgument
     
     new(ClassDeclaration annotatedClass) {
-        unitAnnotation = annotatedClass.annotations?.findFirst[ 
-            functionUnitAnnotation || functionBoardAnnotation || flowUnitAnnotation
-        ]
+        unitAnnotation = annotatedClass.annotations?.findFirst[ flowUnitAnnotation ]
         unitModifier = annotatedClass.annotations?.findFirst[ operationAnnotation || integrationAnnotation ]
         inputPortAnnotationArgument = unitAnnotation?.getValue("inputPorts")
         if (inputPortAnnotationArgument?.class == typeof(AnnotationReference[]))
@@ -167,14 +123,6 @@ annotation OutputPort {
             outputPortAnnotations = #[]
     }
     
-    private def static boolean isFunctionUnitAnnotation(AnnotationReference annotation) {
-        return annotation?.annotationTypeDeclaration?.qualifiedName == FunctionUnit.name
-    }
-
-    private def static boolean isFunctionBoardAnnotation(AnnotationReference annotation) {
-        return annotation?.annotationTypeDeclaration?.qualifiedName == FunctionBoard.name
-    }
-    
     private def static boolean isFlowUnitAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == Unit.name
     }
@@ -185,14 +133,6 @@ annotation OutputPort {
 
     private def static boolean isIntegrationAnnotation(AnnotationReference annotation) {
         return annotation?.annotationTypeDeclaration?.qualifiedName == Integration.name
-    }
-    
-    def boolean isFunctionUnit() { 
-        return this.unitAnnotation.isFunctionUnitAnnotation
-    }
-    
-    def boolean isFunctionBoard() {
-        return this.unitAnnotation.isFunctionBoardAnnotation
     }
     
     def boolean isFlowUnit() {
@@ -230,9 +170,7 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
     override doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
         val flowAnnotation = new FlowAnnotationSignature(annotatedClass)
 
-        if ( flowAnnotation.inputPortAnnotations.doubledAnnotations.empty &&
-            (flowAnnotation.isFunctionUnit || flowAnnotation.isOperationUnit)
-        )
+        if ( flowAnnotation.inputPortAnnotations.doubledAnnotations.empty && flowAnnotation.isOperationUnit)
         {   
             if (flowAnnotation.inputPortAnnotations.empty)
                 context.registerInterface(defaultInputPortInterfaceName(annotatedClass))                
@@ -390,11 +328,11 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             annotatedClass.addWarning("no output port defined")
         }
             
-        if ((flowAnnotation.isFunctionBoard || flowAnnotation.isIntegrationUnit) && 
+        if (flowAnnotation.isIntegrationUnit && 
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].size > 0)
         {
             annotatedClass.declaredMethods.filter[visibility != Visibility::PRIVATE].forEach[
-                addWarning("a FunctionBoard must not have other than private methods")
+                addWarning("an Integration Unit must not have other than private methods")
             ]
         }
     }
@@ -507,9 +445,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             val inputPortInterfaceName = defaultInputPortInterfaceName(annotatedClass)
             val msgType = newTypeReference(typeof(None))
             val processInputMethodName = '''process$«portName»'''
-            val isOperationUnit = flowAnnotation.isFunctionUnit || flowAnnotation.isOperationUnit
             
-            addInputPort(annotatedClass, portName, msgType, processInputMethodName, inputPortInterfaceName, isOperationUnit, context)
+            addInputPort(annotatedClass, portName, msgType, processInputMethodName, inputPortInterfaceName, flowAnnotation.isOperationUnit, context)
          }
          else
             flowAnnotation.inputPortAnnotations.forEach[ inputPortAnnotation |
@@ -518,9 +455,8 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 val inputPortInterfaceName = getInputPortInterfaceName(annotatedClass, portName)
                 val msgType = inputPortAnnotation.portType.type.newTypeReference(inputPortAnnotation.portTypeParameters)
                 val processInputMethodName = '''process$«portName»'''
-                val isOperationUnit = flowAnnotation.isFunctionUnit || flowAnnotation.isOperationUnit
                 
-                addInputPort(annotatedClass, portName, msgType, processInputMethodName, inputPortInterfaceName, isOperationUnit, context)
+                addInputPort(annotatedClass, portName, msgType, processInputMethodName, inputPortInterfaceName, flowAnnotation.isOperationUnit, context)
             ]
             
     }
