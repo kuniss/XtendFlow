@@ -533,9 +533,6 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
             initializer = ['''
                 new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.InputPort<«msgType»>>() {
                     public de.grammarcraft.xtend.flow.InputPort<«msgType»> apply() {
-                      org.eclipse.xtend2.lib.StringConcatenation _builder = new org.eclipse.xtend2.lib.StringConcatenation();
-                      _builder.append(«annotatedClass.simpleName».this, "");
-                      _builder.append(".«portName»");
                       final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception> _function_1 = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception>() {
                         public void apply(final Exception it) {
                           «annotatedClass.simpleName».this.forwardIntegrationError(it);
@@ -547,9 +544,9 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                           «annotatedClass.simpleName».this.«processInputMethodName»(msg);
                         }
                       };
-                      de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function, _function_1);
+                      de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>("«annotatedClass.qualifiedName».«portName»", _function, _function_1);
                       «ELSE»
-                      de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>(_builder.toString(), _function_1);
+                      de.grammarcraft.xtend.flow.InputPort<«msgType»> _inputPort = new de.grammarcraft.xtend.flow.InputPort<«msgType»>("«annotatedClass.qualifiedName».«portName»", _function_1);
                       «ENDIF»
                       return _inputPort;
                     }
@@ -597,15 +594,12 @@ class FunctionUnitProcessor extends AbstractClassProcessor {
                 initializer = ['''
                   new org.eclipse.xtext.xbase.lib.Functions.Function0<de.grammarcraft.xtend.flow.OutputPort<«msgType»>>() {
                       public de.grammarcraft.xtend.flow.OutputPort<«msgType»> apply() {
-                          org.eclipse.xtend2.lib.StringConcatenation _builder = new org.eclipse.xtend2.lib.StringConcatenation();
-                          _builder.append(«annotatedClass.simpleName».this, "");
-                          _builder.append(".«portName»");
                           final org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception> _function = new org.eclipse.xtext.xbase.lib.Procedures.Procedure1<Exception>() {
                             public void apply(final Exception it) {
                               «annotatedClass.simpleName».this.forwardIntegrationError(it);
                             }
                           };
-                          de.grammarcraft.xtend.flow.OutputPort<«msgType»> _outputPort = new de.grammarcraft.xtend.flow.OutputPort<«msgType»>(_builder.toString(), _function);
+                          de.grammarcraft.xtend.flow.OutputPort<«msgType»> _outputPort = new de.grammarcraft.xtend.flow.OutputPort<«msgType»>("«annotatedClass.qualifiedName».«portName»", _function);
                           return _outputPort;
                       }
                   }.apply();
