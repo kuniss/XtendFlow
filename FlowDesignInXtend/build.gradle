@@ -1,13 +1,13 @@
 plugins {
 	id 'java'
-    id "org.xtext.xtend" version "1.0.0"
+    id "org.xtext.xtend" version "1.0.3"
 }
 
 repositories.jcenter()
 
 dependencies {
   compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.9.+'
-  compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.4.+'
+  compile 'de.grammarcraft:de.grammarcraft.xtend.flow:0.5.+'
   compile 'junit:junit:4.+' 
 }
 
@@ -16,5 +16,5 @@ sourceSets {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '2.7'
+	gradleVersion = '2.11'
 }
