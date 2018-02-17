@@ -37,7 +37,7 @@ class MapIt<InputType, OutputType> implements IFunctionUnit,
 	 * @param operation the function to be applied for mapping
 	 */
     new (String unitName, (InputType)=>OutputType operation) {
-		this.name = name
+		this.name = unitName
 		this.operation = operation
     }
     
