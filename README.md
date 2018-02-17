@@ -35,10 +35,10 @@ would be declared in Xtend as the follows:
 ```java
 @Unit(
     inputPorts = #[
-        @InputPort(name="input", type=String)
+        @Port(name="input", type=String)
     ],
     outputPorts = #[
-        @OutputPort(name="output", type=String)
+        @Port(name="output", type=String)
     ]
 )
 class ToUpper {
@@ -57,10 +57,10 @@ The `ToUpper` function unit from above is intended to be a operation unit in the
 ```java
 @Operation @Unit(
     inputPorts = #[
-        @InputPort(name="input", type=String)
+        @Port(name="input", type=String)
     ],
     outputPorts = #[
-        @OutputPort(name="output", type=String)
+        @Port(name="output", type=String)
     ]
 )
 class ToUpper {
@@ -106,11 +106,11 @@ Nevertheless they are treated as function units as well, having input and output
 ```java
 @Integration @Unit(
     inputPorts = #[
-        @InputPort(name="input", type=String)
+        @Port(name="input", type=String)
     ],
     outputPorts = #[
-        @OutputPort(name="lower", type=String),
-        @OutputPort(name="upper", type=String)
+        @Port(name="lower", type=String),
+        @Port(name="upper", type=String)
     ]
 )
 class Normalize {
