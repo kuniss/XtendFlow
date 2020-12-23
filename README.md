@@ -1,5 +1,8 @@
-XtendFlow [![Build Status](https://travis-ci.org/kuniss/XtendFlow.svg?branch=master)](https://travis-ci.org/kuniss/XtendFlow) [![Download](https://api.bintray.com/packages/kuniss/maven/de.grammarcraft.xtend.flow/images/download.svg) ](https://bintray.com/kuniss/maven/de.grammarcraft.xtend.flow/_latestVersion) [![Get automatic notifications about new "de.grammarcraft.xtend.flow" versions](https://www.bintray.com/docs/images/bintray_badge_color.png) ](https://bintray.com/kuniss/maven/de.grammarcraft.xtend.flow/view?source=watch)
+XtendFlow [![Build Status](https://travis-ci.org/kuniss/XtendFlow.svg?branch=master)](https://travis-ci.org/kuniss/XtendFlow) [![Download](https://api.bintray.com/packages/kuniss/maven/de.grammarcraft.xtend.flow/images/download.svg) ](https://bintray.com/kuniss/maven/de.grammarcraft.xtend.flow/_latestVersion) 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.grammarcraft/de.grammarcraft.xtend.flow/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.grammarcraft/de.grammarcraft.xtend.flow/)
 =====================================================================================================================
+
+[![Get automatic notifications about new "de.grammarcraft.xtend.flow" versions](https://www.bintray.com/docs/images/bintray_badge_color.png) ](https://bintray.com/kuniss/maven/de.grammarcraft.xtend.flow/view?source=watch)
 
 This library enables [Xtend](https://www.eclipse.org/xtend/) for Flow Design based programming, the natural approach for [IODA Architectures](http://geekswithblogs.net/theArchitectsNapkin/archive/2015/04/29/the-ioda-architecture.aspx).
 
